@@ -1,3 +1,31 @@
+\begin{abstract}
+Micro-services are currently the hot new technology for the web, they allow us to break up our otherwise monolithic architecture into much smaller more focused services. This has a lot of benefits, such as reducing system size and complexity and increasing release frequency and agility. 
+
+There is one flaw with a micro-services architecture which I would like to attempt to address in this paper. When a particular micro service crashes it can be hard to find the root cause. Typically a developer would start their analysis by checking the logs of the failed service. This can be be both time consuming and potentially lead to misdiagnoses. The reason is that the developer is not seeing the full picture. For example the failure on service A could be a direct result of a problem that originated on service B. It is also possible that the root cause could be concealing itself in some convoluted log message that a typical developer could misinterpret. Due to the nature of micro-services encouraging continuous deployment it is also possible that a crash was as a direct result of a service deployment at a particular point in time. 
+
+This paper will focus mainly on root cause analysis of micro-services deployed to Pivotal Cloud Foundry which is a popular PaaS.
+
+\end{abstract}
+
 \chapter{Research Context}
 \lhead{\emph{Research Context}}
-Describe the broad context of the research, including a review of the current state of the art in the topic of the proposed research with references, and the overall contribution which it will make to the general field of research.
+In my current organization we have a micro-service architecture. There are 100+ services written in multiple languages, including Node.js, Java, Python, Golang. We deploy all of our services onto Pivotal Cloud Foundry. Our current solution for log analysis is an ELK stack (Elastic-search, Log-stash and Kibana). This provides a nice interface to see the logs, however it has no opinions on where the logs come from or what information they hold. The user is on their own when trying to find a root cause to any issues.
+
+Root cause analysis of a micro-services environment presents the following challenges
+
+\begin{itemize}
+  \item Logs from multiple services written in different languages. i.e. Node.js or Java
+  \item Log streaming and log analysis in real time. 
+  \item Store and process potentially Gigabytes of log data safely
+  \item Auto-scaling
+\end{itemize}
+
+Log analysis is nothing new, however with the emergence of micro-services it has become far more challenging. Some of these challenges include
+
+There has already been a lot of research papers written on the subject log analysis. This paper written in 2017\cite{8067504} outlines the creation of a log analysis tool called POP that runs on an Apache Spark Cluster can accurately and quickly determine issues in logs. This tool has been open sourced at \href{https://github.com/logpai/logparser}{https://github.com/logpai/logparser}.
+
+In this paper written in 2016\cite{7748933} There was again a proposal to use Apache Spark  along with Apache Flume for real time log analysis. 
+
+While log analysis should play a valuable role in our root cause analysis, we also want to take this further and utilize some of the features that Cloud Foundry can give us. One of the challenges in log analysis is finding out the source code type. If we know the source code type we could implement a different set of log analysis rules. for example is it Node.js or is it Java. Cloud foundry works on the concept of build-packs. For each language there is a different build-pack. If our service is written in Node.js we would use the node build-pack. This informations is readily available through the Cloud Foundry public API. A simple interrogation of this API would give us an indication of the source type.
+
+Another feature of cloud foundry is Events. Say we scale a service to 2 instances. Cloud Foundry will emit an event that this has happened, again this information is readily available through the public API. Other events include, but are not limited to, starting, stopping and crashing of services. 
