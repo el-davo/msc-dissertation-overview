@@ -9,7 +9,7 @@ This paper will focus mainly on root cause analysis of micro-services deployed t
 
 \chapter{Research Context}
 \lhead{\emph{Research Context}}
-In my current organization we have a micro-service architecture. There are 100+ services written in multiple languages, including Node.js, Java, Python, Golang. We deploy all of our services onto Pivotal Cloud Foundry. Our current solution for log analysis is an ELK stack (Elastic-search, Log-stash and Kibana). This provides a nice interface to see the logs, however it has no opinions on where the logs come from or what information they hold. The user is on their own when trying to find a root cause to any issues.
+In my current organization we have a micro-service architecture. There are 100+ services written in multiple languages, including Node.js, Java, Python, Golang. We deploy all of our services onto Pivotal Cloud Foundry. Our current solution for root cause analysis is an ELK stack (Elastic-search, Log-stash and Kibana). This provides a nice interface to see the logs from all services. While an ELK stack can provide some interesting insights into your environment such as geo identification of web users\cite{7508191}, it has some drawbacks in it being a very manual process. You need to manually identify what times certain events took place and manually enter your own queries, which is very time consuming.
 
 To have an effective root cause analysis system we will need to look at certain metrics in real time. Log analysis has become a key metric over the last few years, however with the emergence of micro-services it has become more challenging in the following ways.
 
@@ -21,6 +21,8 @@ To have an effective root cause analysis system we will need to look at certain 
   \item Continuous deployments
 \end{itemize}
 
-There has been research done in the past which tries to solve these challenges by utilizing Big Data analysis with Apache Spark and machine learning techniques\cite{8067504}. Similarly this paper\cite{7748933} proposes to use Apache Flume and Apache Spark for real time analysis. 
+There has been research done in the past which tries to solve these challenges by utilizing Big Data analysis with Apache Spark and machine learning techniques\cite{8067504}. Similarly this paper\cite{7748933} proposes to use Apache Flume and Apache Spark for real time analysis.
+
+For the machine learning aspects we would a dataset to compare against. Usually when a developer has a problem they cannot solve they turn to a website called stackoverflow.com. This is an answer and questions website for developers where users can post a question containing a stack trace and the community would give them answers on what the potential cause is, the better the answer the more ratings it has. This could be a potential source of data sets for machine learning. It is possible to mine a website such as stackoverflow as is described in "Association rule mining for finding usability problem patterns"\cite{8320144}.
 
 While log analysis should play a valuable role in our root cause analysis, I would like to take this further and utilize some of the features that Cloud Foundry can give us. PCF has a rich public API which can give us a lot of extra data on the state of our environment, for example it is possible to interrogate the core language a service was written in by interrogating build-pack types, if we know the language it may make log analysis easier as we can in theory apply a more targeted set of rules to our analysis for that specific language. PCF can also give us current memory and disk space usage of deployed applications as well as events that took place within a certain time-frame such as starting, stopping or crashing.
