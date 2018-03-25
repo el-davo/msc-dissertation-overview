@@ -3,29 +3,26 @@ Micro-services are currently the hot new technology for the web, they allow us t
 
 There is one flaw with a micro-services architecture which I would like to attempt to address in this paper. When a particular micro service crashes it can be hard to find the root cause. Typically a developer would start their analysis by checking the logs of the failed service. This can be be both time consuming and potentially lead to misdiagnoses. The reason is that the developer is not seeing the full picture. For example the failure on service A could be a direct result of a problem that originated on service B. It is also possible that the root cause could be concealing itself in some convoluted log message that a typical developer could misinterpret. Due to the nature of micro-services encouraging continuous deployment it is also possible that a crash was as a direct result of a service deployment at a particular point in time. 
 
-This paper will focus mainly on root cause analysis of micro-services deployed to Pivotal Cloud Foundry which is a popular PaaS.
+This paper will focus mainly on root cause analysis of micro-services deployed to a popular PaaS called Pivotal Cloud Foundry
 
 \end{abstract}
 
 \chapter{Research Context}
 \lhead{\emph{Research Context}}
-In my current organization we have a micro-service architecture. There are 100+ services written in multiple languages, including Node.js, Java, Python, Golang. We deploy all of our services onto Pivotal Cloud Foundry. Our current solution for log analysis is an ELK stack (Elastic-search, Log-stash and Kibana). This provides a nice interface to see the logs, however it has no opinions on where the logs come from or what information they hold. The user is on their own when trying to find a root cause to any issues.
+In my current organization we have a micro-service architecture. There are 100+ services written in multiple languages, including Node.js, Java, Python, Golang. We deploy all of our services onto Pivotal Cloud Foundry. Our current solution for root cause analysis is an ELK stack (Elastic-search, Log-stash and Kibana). This provides a nice interface to see the logs from all services. While an ELK stack can provide some interesting insights into your environment such as geo identification of web users\cite{7508191}, it has some drawbacks in it being a very manual process. You need to manually identify what times certain events took place and manually enter your own queries, which is very time consuming.
 
-Root cause analysis of a micro-services environment presents the following challenges
+To have an effective root cause analysis system we will need to look at certain metrics in real time. Log analysis has become a key metric over the last few years, however with the emergence of micro-services it has become more challenging in the following ways.
 
 \begin{itemize}
   \item Logs from multiple services written in different languages. i.e. Node.js or Java
   \item Log streaming and log analysis in real time. 
   \item Store and process potentially Gigabytes of log data safely
   \item Auto-scaling
+  \item Continuous deployments
 \end{itemize}
 
-Log analysis is nothing new, however with the emergence of micro-services it has become far more challenging. Some of these challenges include
+There has been research done in the past which tries to solve these challenges by utilizing Big Data analysis with Apache Spark and machine learning techniques\cite{8067504}. Similarly this paper\cite{7748933} proposes to use Apache Flume and Apache Spark for real time analysis.
 
-There has already been a lot of research papers written on the subject log analysis. This paper written in 2017\cite{8067504} outlines the creation of a log analysis tool called POP that runs on an Apache Spark Cluster can accurately and quickly determine issues in logs. This tool has been open sourced at \href{https://github.com/logpai/logparser}{https://github.com/logpai/logparser}.
+For the machine learning aspects we would a dataset to compare against. Usually when a developer has a problem they cannot solve they turn to a website called stackoverflow.com. This is an answer and questions website for developers where users can post a question containing a stack trace and the community would give them answers on what the potential cause is, the better the answer the more ratings it has. This could be a potential source of data sets for machine learning. It is possible to mine a website such as stackoverflow as is described in "Association rule mining for finding usability problem patterns"\cite{8320144}.
 
-In this paper written in 2016\cite{7748933} There was again a proposal to use Apache Spark  along with Apache Flume for real time log analysis. 
-
-While log analysis should play a valuable role in our root cause analysis, we also want to take this further and utilize some of the features that Cloud Foundry can give us. One of the challenges in log analysis is finding out the source code type. If we know the source code type we could implement a different set of log analysis rules. for example is it Node.js or is it Java. Cloud foundry works on the concept of build-packs. For each language there is a different build-pack. If our service is written in Node.js we would use the node build-pack. This informations is readily available through the Cloud Foundry public API. A simple interrogation of this API would give us an indication of the source type.
-
-Another feature of cloud foundry is Events. Say we scale a service to 2 instances. Cloud Foundry will emit an event that this has happened, again this information is readily available through the public API. Other events include, but are not limited to, starting, stopping and crashing of services. 
+While log analysis should play a valuable role in our root cause analysis, I would like to take this further and utilize some of the features that Cloud Foundry can give us. PCF has a rich public API which can give us a lot of extra data on the state of our environment, for example it is possible to interrogate the core language a service was written in by interrogating build-pack types, if we know the language it may make log analysis easier as we can in theory apply a more targeted set of rules to our analysis for that specific language. PCF can also give us current memory and disk space usage of deployed applications as well as events that took place within a certain time-frame such as starting, stopping or crashing.
