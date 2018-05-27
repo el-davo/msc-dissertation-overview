@@ -1,9 +1,9 @@
 \begin{abstract}
-Microservices are currently the hot new technology for the web, they allow us to break up our otherwise monolithic architecture into much smaller more focused services. This has a lot of benefits, such as reducing system size and complexity and increasing release frequency and agility. 
+Microservices are currently the hot new technology for the web, they allow us to break up our otherwise monolithic architecture into much smaller more focused services. This has a lot of benefits, such as reducing system size and increasing release frequency and agility. 
 
 There is one flaw with a micro-services architecture which I would like to attempt to address in this paper. When a particular micro service crashes it can be hard to find the root cause. Typically a developer would start their analysis by checking the logs of the failed service. This can be both time consuming and potentially lead to misdiagnoses. The reason is that the developer is not seeing the full picture. For example, the failure on service A could be a direct result of a problem that originated on service B. It is also possible that the root cause could be concealing itself in some convoluted log message that a typical developer could misinterpret. Due to the nature of micro-services encouraging continuous deployment it is also possible that a crash was as a direct result of a service deployment at a particular point in time. 
 
-This paper will focus mainly on root cause analysis of micro-services deployed to a popular PaaS called Pivotal Cloud Foundry
+This paper will focus mainly on root cause analysis of micro-services deployed to a popular PaaS called Pivotal Cloud Foundry.
 
 \end{abstract}
 
