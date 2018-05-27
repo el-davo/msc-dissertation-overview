@@ -1,4 +1,7 @@
 \begin{abstract}
+
+(200 words)
+
 Microservices are currently the hot new technology for the web, they allow us to break up our otherwise monolithic architecture into much smaller more focused services. This has a lot of benefits, such as reducing system size and increasing release frequency and agility. 
 
 Microservices are not without their flaws. For example, When a particular microservice crashes it can be difficult and time-consuming to find the root cause. Typically a developer would start their analysis by checking the logs of the failed service. This can be a lengthy process and potentially lead to misdiagnoses. The reason is that the developer is not seeing the full picture. For example, the failure on service A could be a direct result of a problem that originated on service B. It is also possible that the root cause could be concealing itself in some convoluted log message that a typical developer could misinterpret. Due to the nature of microservices encouraging continuous deployment it is also possible that a crash was as a direct result of a service deployment at a particular point in time. 
@@ -9,6 +12,8 @@ This paper will focus mainly on root cause analysis of microservices deployed to
 
 \chapter{Research Context}
 \lhead{\emph{Research Context}}
+
+(530 words)
 
 Root cause analysis of systems can be a complex task. The emergence of distributed architectures such as microservices has presented many new challenges in this area. Log file analysis is a key contributor to many RCA systems. This is hardly surprising as logs are often the first place a developer will look in order to diagnose faults. To have an effective log analyzer we need to take into account that logs can come from multiple services written in many different languages such as Node.js and Java. These logs need to be analyzed in real time and potentially lead to many Gigabytes of data passing through the system. On top of all that the log analyzer needs to be able to identify the root causes and present its findings with minimal latency. 
 
