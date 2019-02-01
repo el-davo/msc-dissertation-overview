@@ -186,7 +186,7 @@
     \vskip 10\p@
     \begin{center}
       \setlength{\parskip}{0pt}
-      {\includegraphics[width=0.7\textwidth]{Figures/CITCREST.jpg}}
+      {\includegraphics[width=0.7\textwidth]{figures/CITCREST.jpg}}
       \vfill
       {\huge \bf \@title \par}
       \vfill
