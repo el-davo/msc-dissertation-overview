@@ -1,28 +1,40 @@
 \begin{abstract}
 
-(200 words)
+Websockets have emerged as a leading technology in real-time communication systems. They allow for multi-duplex communication between systems.
 
-Microservices are currently the hot new technology for the web, they allow us to break up our otherwise monolithic architecture into much smaller more focused services. This has a lot of benefits, such as reducing system size and increasing release frequency and agility. 
+Many companies have made a switch to microservice architectures. This presents some new challenges when integrating websockets into a microservice environment. Websockets are now speaking to different services behind the scenes. Developers need to know how their microservice environment reacts efficiently with minimal latency under certain loads when utilizing websockets. Many companies opt to use a PaaS (Platform as a service) to help them easily scale their applications. There are a number of PaaS systems on the market such as Pivotals Cloud Foundry, IBM Bluemix and GKE (Google Kubernetes Engine). These platforms expose powerful API's to gain insights into applications running on them.
 
-Microservices are not without their flaws. For example, When a particular microservice crashes it can be difficult and time-consuming to find the root cause. Typically a developer would start their analysis by checking the logs of the failed service. This can be a lengthy process and potentially lead to misdiagnoses. The reason is that the developer is not seeing the full picture. For example, the failure on service A could be a direct result of a problem that originated on service B. It is also possible that the root cause could be concealing itself in some convoluted log message that a typical developer could misinterpret. Due to the nature of microservices encouraging continuous deployment it is also possible that a crash was as a direct result of a service deployment at a particular point in time. 
-
-This paper will focus mainly on root cause analysis of microservices deployed to a popular PaaS called Pivotal Cloud Foundry.
+The aim of this project is to create a websocket stress testing tool that can utilize Cloud Foundry's API in order to give developers a snapshot of how their entire microservice environment reacts under certain conditions.
 
 \end{abstract}
 
 \chapter{Research Context}
 \lhead{\emph{Research Context}}
 
-(530 words)
+Websockets are a TCP based protocol\cite{8089962}. There have been a number of patterns and methods used in the past to simulate real-time communication. These include both polling and long polling. With polling, a client would make a request to a server continuously every few seconds. This method of communication had some drawbacks. It required connections to make a TCP handshake every time it reconnected. This handshake is costly as it takes a number of milliseconds to initiate. This is not a huge deal with just one connection. However when this is scaled up to hundreds of thousands of users then this TCP handshake will really impact a system\cite{5735801}. HTTP handshakes involve sending a SYN packet to the server which response with a SYN ACK to acknowledge the request then the client sends another SYN packet and connection is then established\ref{fig:http-handshake}\cite{5735801}. HTTP(s) further complicates the process as now the communication takes place over TLS (Transport Layer Security)\ref{fig:https-handshake}. 
 
-Root cause analysis of systems can be a complex task. The emergence of distributed architectures such as microservices has presented many new challenges in this area. Log file analysis is a key contributor to many RCA systems. This is hardly surprising as logs are often the first place a developer will look in order to diagnose faults. To have an effective log analyzer we need to take into account that logs can come from multiple services written in many different languages such as Node.js and Java. These logs need to be analyzed in real time and potentially lead to many Gigabytes of data passing through the system. On top of all that the log analyzer needs to be able to identify the root causes and present its findings with minimal latency. 
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{figures/http-handshake.png}
+    \caption{HTTP handshake}
+    \label{fig:http-handshake}
+\end{figure}
 
-There has been a lot of research on the topic of log analysis. Most argue that this is firmly a big data problem and tools such as Apache Spark\cite{8067504} or Apache Kafka\cite{adamson2014combined} would be required to allow for a real-time analysis. Machine learning has also been put forward as a method for detecting anomalies in systems. An anomaly detection system for Web log files has been proposed. This system adopts a two-level machine learning algorithm, the decision tree algorithm and HMM, which can detect anomalous data and spot unknown attacks\cite{8322600}.
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{figures/https-handshake.jpg}
+    \caption{HTTP(s) handshake over TLS}
+    \label{fig:https-handshake}
+\end{figure}
 
-While log analysis is an effective tool for RCA, there are some events that are hard to capture from the log alone. For instance, they do rely a lot on the fact the service logs contain meaningful messages, it is not entirely infeasible that a service may log nothing at all. It is also hard to detect from the logs the exact state of the service at any given time, such as memory capacity and CPU usage. Microservices encourage rapid continuous deployments\cite{villamizar2015evaluating}. A deployment could be viewed as a planned killing of a service and replaced with the new service. Log analysis tools may be tricked in this instance and incorrectly report that a service has crashed. 
+Long polling tries to address this issue by making a request from the client to the server. The server then keeps the connection open for a specified amount of time. The server will wait for new information to arrive from somewhere. If data arrives before the connection times out then the connection is immediately terminated and the data is sent to the client. If no data has arrived by the time the connection times out then the connection is terminated and no data is sent to the client. In both cases the client will then reconnect and wait for more data to arrive. As specified in \cite{6364271}, long polling has one drawback in real time communication systems in that it needs more than one connection to achieve bi-directional communication.
 
-Pivotal Cloud Foundry\cite{6924673} (PCF) has become a popular platform as a service (PaaS) over the last few years. It makes working with microservices much easier with features including zero downtime blue/green deployments, auto-scaling and access to a multitude of third-party services like MySQL and RabbitMQ.
+There has been a huge shift from desktop devices to mobile devices\cite{6365155}. It has been proven that communication methods such as polling and long polling can have a negative affect on the batter life of mobile devices\cite{6364271}. This is due to the continuous connection and re-connection cycles, which are further exasperated by the fact that most of these connections are over cellular networks.
 
-Cloud Foundry has a rich public API which can give us a lot of extra data on the state of our environment, for example it is possible to get the language a service was written in by interrogating build-pack types, if we know the language it may make log analysis easier as, we can, in theory, apply a more targeted set of rules to our analysis for that specific language. PCF can also give us current memory and disk space usage of deployed applications as well as events that took place within a certain time-frame such as starting, stopping or crashing. With PCF it is also possible to send logs from any service to any user configured location. This is known as the logregator\cite{winn2017cloud}
+WebSockets aim to try and fix a lot of these shortcomings. This includes the ability to have full-duplex communication over a single persisted connection. WebSocket support is available in all major browsers, including mobile browsers. Once a connection is established between a server and a client, then both can communicate freely with each other by sending data encapsulated within a frame plus 2 extra bytes of payload, which is a huge reduction in payload from HTTP requests. There are 2 main stages to establishing and sending data over websockets. These include the handshake stage, which like polling and long polling is done over HTTP. The reason this is done over HTTP is because websocket protocols are built on top of HTTP. They also had backward compatibility in mind with HTTP in that you can send a GET request to a websocket server and the server will send back an UPGRADE request telling the client that communication over a websocket protocol is available. The client can then decide whether to upgrade or not.
 
-Combining log analysis with Cloud Foundry's rich API could eliminate some of the potential pitfalls of log analysis only solutions. 
+\subsection{Keep Alive Mechanisms}
+
+Because WebSocket servers can hold potentially hundreds of thousands of connection open simultaneously, it is reasonable that the server may want to recycle some of these connections to prevent itself from becoming overloaded. Websockets support a keep alive mechanism to tell the server that the client is still actively using the connection. This is done in the form of a PING/PONG request. The server will send a ping request to the client, if the client is still active then it will respond with a pong. If the client does not respond then the server is free to terminate the connection and freeing up some resources in the process. 
+
+\subsection{Websockets in a microservices environment}
