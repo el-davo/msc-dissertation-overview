@@ -191,3 +191,75 @@ Once you have selected your desired cluster resources, click Create and in a few
 
 After clicking connect you will be given a command that you can run on your machine. Before running this command you will need to install the Google Cloud SDK tools. There is a quickstart guide available
 \href{https://cloud.google.com/sdk/docs/quickstart-linux}{here}. Once you have installed the SDK tools then use the command that you have been given from the GKE console and you should be able to connect.
+
+\subsection{Providing a scripting interface}
+
+To ensure that it is possible to test a websocket server in a number of scenarios, the ws-flare platform allows users to essentially script how they want the test to progress. This enables the user to simulate a lot more scenarios then just simulating a number of connections at a time. When users create a new task with the platform they will be offered the opportunity to add a script. The script itself is a JSON array. An example of a valid script is below.
+
+\begin{minted}{JSON}
+[
+    {
+        "start": 0,
+        "timeout": 55,
+        "totalSimulators": 10000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    },
+    {
+        "start": 60,
+        "timeout": 30,
+        "totalSimulators": 5000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    },
+    {
+        "start": 120,
+        "timeout": 60,
+        "totalSimulators": 15000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    }
+]
+\end{minted}
+
+In this scenario, we will initially be simulating 10000 connection o a websocket server. After 55 seconds, those 10000 connection will disconnect and one minute into the test another 5000 connection will attempt to connect to the server and disconnect after 30 seconds. Finally 2 minutes into the test 15000 connection will be simulated for one minute. Scripting is a very powerful feature of the stress testing platform. 
+
+One scenario we hope to detect with scripting is the ability for a websocket server to actively clean up after itself when users disconnect. One scenario we found recently where this would have been applicable is having a websocket server backed by a Redis database. The role of the websocket server was to send notifications. Whenever a new websocket connected to the server the websocket server would create a new connection to the Redis database to wait for notifications. We noticed ever hour or so the application would crash and restart automatically. After some investigation it was found that the Redis connections were never dropped when a user disconnected their websocket. Over time the websocket server would simply be starved of memory and crash. With this scripting ability we can actively test for this kind of scenario, among many other scenarios.
+
+\subsection{Pivotal Cloud Foundry Monitoring}
+
+As mentioned already, Cloud Foundry exposes a powerful API. As a ws-flare test is in progress the platform will actively attempt to gain valuable metrics from this API. The first thing that happens when the test begins is that the system will attempt to log into cloud foundry using the user provided email and password. The login API endpoint request code is below
+
+\begin{minted}{typescript}
+async login(authorization_endpoint: string): Promise<Token> {
+    const token = await post('https://api.run.pivotal.io
+/oauth/token', {
+            headers: {
+                Authorization: 'Basic Y2Y6',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            json: true,
+            form: {
+                grant_type: 'password',
+                client_id: 'cf',
+                username: this.cfUser,
+                password: this.cfPass
+            }
+        });
+
+    return token.content as any;
+}
+\end{minted}
+
+Using this code we can get an access token that can be used to query the endpoints we need. A few important points, we need to set Basic Y2Y6 as an Authorization header and the correct Content-Type. It is also necessary to specify the grant\_type which in this case is password. Cloud Foundry offers a number of grant types such as password and oauth. 
+
+Cloud Foundry is split up into 3 logical entities. These are
+
+\begin{itemize}
+  \item Organizations
+  \item Spaces
+  \item Applications
+\end{itemize}
+
+Organizations represent a department in a company.
+
+Spaces represent different environments. Spaces make environment repeat-ability very simple. For example you could have a DEV, STAGING and PROD environment all with the same applications deployed and utilizing the same resources, however they are used for very different things. The DEV environment can be used by developers for testing code changes. The STAGING environment can be used by a quality assurance team to test any new features before reaching the PROD environment. the PROD environment is the last stop and this is the environment that the end user will be connecting to.
+
+The application
