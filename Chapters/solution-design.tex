@@ -258,8 +258,42 @@ Cloud Foundry is split up into 3 logical entities. These are
   \item Applications
 \end{itemize}
 
-Organizations represent a department in a company.
+Organizations represent a department in a company. The organization is the entity that is billed for the resources used on Cloud Foundry. On PWS (Pivotal Web Services) which is Pivotals cloud offering of Cloud Foundry this is measured in both CPU usage and Memory usage over a period of a month.
 
 Spaces represent different environments. Spaces make environment repeat-ability very simple. For example you could have a DEV, STAGING and PROD environment all with the same applications deployed and utilizing the same resources, however they are used for very different things. The DEV environment can be used by developers for testing code changes. The STAGING environment can be used by a quality assurance team to test any new features before reaching the PROD environment. the PROD environment is the last stop and this is the environment that the end user will be connecting to.
 
-The application
+Just like there can be multiple spaces in an organization, there can also be multiple applications deployed in a space. The applications themselves are the applications that a developer write. Applications on Cloud Foundry run in droplets, which are a kin to docker containers. Droplets require a user to specify a buildpack. Buildpacks are runtime environments for an application. Cloud Foundry supports many buildpacks for many different languages such as Java and NodeJS. To deploy an application to cloud foundry a user only needs to have an account and a manifest.yml file in the root of their project. A typical manifest file for a JAVA project might look like.
+
+\begin{minted}{YAML}
+name: cardsec
+instances: 1
+memory: 1024M
+path: build/libs/cardsec-0.0.1-SNAPSHOT.jar
+buildpack: java_buildpack
+\end{minted}
+
+The name represents the name of the application on cloud foundry. The instances are the number of running instances of the application, this allows users to easily scale up their applications under heavy load. The memory field is the total amount of memory that this app is allowed to consume. If this limit is exceeded then an application will likely crash with an out of memory exception. The path is the path to the generated jar file for this Java project and the buildpack is the desired run time environment, which in this case is Java.
+
+Once ws-flare has gained access to cloud foundry we can now use the token to interrogate applications running within a specified space. Each running application has a unique GUID assigned to it. To find these unique ids we first need to find which organization and space the applications are running in. We first retrieve the list of organizations using the code below
+
+\begin{minted}{typescript}
+var response = json('https://api.run.pivotal.io/v2/organizations', {
+    headers: {
+        Authorization: token.token_type + ' ' + token.access_token,
+        Accept: "application/json"
+    }
+});
+\end{minted}
+
+This will yield a list of organization running in Cloud Foundry that the user has access to. Each organization also has a unique GUID. Once we find the correct GUID we can then use this to search for the correct space by using the code below.
+
+\begin{minted}[breaklines]{typescript}
+var response = json('https://api.run.pivotal.io/v2/organizations/' + orgId + '/spaces', {
+    headers: {
+        Authorization: token.token_type + ' ' + token.access_token,
+        Accept: "application/json"
+    }
+});
+\end{minted}
+
+This will yield a list of spaces. Again each space has a unique GUID which we can use to get all the applications running within a space. Finally to get a list of applications running within a space we can use the following code
