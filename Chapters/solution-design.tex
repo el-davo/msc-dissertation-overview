@@ -296,4 +296,54 @@ var response = json('https://api.run.pivotal.io/v2/organizations/' + orgId + '/s
 });
 \end{minted}
 
-This will yield a list of spaces. Again each space has a unique GUID which we can use to get all the applications running within a space. Finally to get a list of applications running within a space we can use the following code
+This will yield a list of spaces. Again each space has a unique GUID which we can use to get all the applications running within a space. To get a list of applications running within a space we can use the following code
+
+\begin{minted}[breaklines]{typescript}
+var response =  json('https://api.run.pivotal.io/v2/spaces/' + spaceId +'/apps', {
+    headers: {
+        Authorization: token.token_type + ' ' + token.access_token
+    }
+});
+\end{minted}
+
+Once the correct apps are found the last step is to use the obtained app guids to get application statistics such as CPU and Memory usage. It is also possible to query the state of the application. There are 3 application states possible, these are, RUNNING, STOPPED and CRASHED. To get the infomormation about a running application the code below is used. 
+
+\begin{minted}[breaklines]{typescript}
+json('https://api.run.pivotal.io/v2/apps/' + appId + '/stats', {
+    headers: {
+        Authorization: token.token_type + ' ' token.access_token
+    }
+});
+\end{minted}
+
+An example of a response from this endpoint is detailed below
+
+\begin{minted}[breaklines]{JSON}
+{
+  "0": {
+    "state": "RUNNING",
+    "isolation_segment": "iso-seg-name",
+    "stats": {
+      "usage": {
+        "disk": 66392064,
+        "mem": 29880320,
+        "cpu": 0.13511219703079957,
+        "time": "2014-06-19 22:37:58 +0000"
+      },
+      "name": "app_name",
+      "uris": [
+        "app_name.example.com"
+      ],
+      "host": "10.0.0.1",
+      "port": 61035,
+      "uptime": 65007,
+      "mem_quota": 536870912,
+      "disk_quota": 1073741824,
+      "fds_quota": 16384
+    }
+  }
+}
+\end{minted}
+
+As can be seen in the response, there are some very useful metrics here. The cloud foundry monitor client will continue to poll this endpoint for the duration of the stress test. Polling will take place every second. All results from a successful request are stored in a MySQL database for displaying the results over a period of time.
+
