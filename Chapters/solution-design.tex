@@ -347,3 +347,25 @@ An example of a response from this endpoint is detailed below
 
 As can be seen in the response, there are some very useful metrics here. The cloud foundry monitor client will continue to poll this endpoint for the duration of the stress test. Polling will take place every second. All results from a successful request are stored in a MySQL database for displaying the results over a period of time.
 
+\section{Stress testing the websocket server}
+
+For connecting to a live websocket server we have chosen to utilize a popular NodeJS client called \href{https://www.npmjs.com/package/ws}{ws}. This is an intuitive client that has many useful features and hooks. For the purposes of this project we will be monitoring certain metrics of a live websocket server. We will be monitoring the following metrics.
+
+\begin{itemize}
+  \item Successful connection over a period of time
+  \item Failed connections
+  \item Dropped connections
+  \item Latency in a successful connection
+\end{itemize}
+
+NodeJS ws client offers a few useful hooks when it comes to checking if a connection has successfully connected, failed or dropped. 
+
+\begin{minted}[breaklines]{typescript}
+const ws = new WebSocket('ws://www.host.com/path');
+ 
+ws.on('open',  () => console.log('Successfully connected'));
+
+ws.on('error',  () => console.log('Connection failed'));
+
+ws.on('close' => console.log('Connection dropped'));
+\end{minted}
