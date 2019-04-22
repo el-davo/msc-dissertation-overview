@@ -1,0 +1,86 @@
+\chapter{Background}
+\lhead{\emph{Background}}
+
+In this chapter the background research will be presented. This includes an overview of the current technologies in the area as well as the technologies used in this project and review of the current research.
+
+\section{Test Automation}
+
+One of the goals of automated testing is to reduce the the number of manual test cases. It is important to note that automated testing does not completely remove the need for manual testing, instead it will free testers from repeating tedious tests, and allow them to focus on exploratory testing. Automated testing comes in many forms, such as Unit or Integration testing. There are also many agile methodologies around testing. So called extreme programming allows for a number of practices around automated testing. For example developers are encouraged to pair on many tasks. This involves both developers sitting in front of 2 screens which show the same code. This is important as with pairing it is important not to sit in unnatural positions as pairing can take place over a number of hours, and developer health should be taken into consideration. During pairing developers can write tests as they are developing software. One method called ping pong pairing involves one developer writing a failing unit test, the next developer will then make the failing test pass. Then the roles are reversed. This gives both developers a chance at writing both tests and implementations, increasing both of their knowledge of the code base. 
+
+One paradigm which is often used to describe what test automation is the testing pyramid which is depicted in figure \ref{fig:testing-pyramid}
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/testing-pyramid.png}
+    \caption{Testing pyramid}
+    \label{fig:testing-pyramid}
+\end{figure}
+
+The testing pyramid states that tests on the bottom are fast running such as unit tests. They are relatively inexpensive to write. As we move up the pyramid we see that tests are much slower to run and become more expensive in terms of time to run and infrastructure required.
+
+\section{Stress Testing}
+
+Stress testing involves the process of simulating multiple users against an environment to see can that environment handle a specified load. It is not clear where stress testing fits into the testing pyramid depicted in figure \ref{fig:testing-pyramid}. There are many stress testing tools on the market such as Apache JMeter, WebLOAD and LoadNinja. These tools fit will into integration environments. For example, when a developer pushes code changes to a code revision tool such as Git, a continuous integration tool such as Jenkins can run a build which stress tests the changes using JMeter, if any of the code changes cause degredation then JMeter will pick this up and possibly fail a build, meaning that the developer must fix the issue before they are allowed to merge their changes to a master branch. This prevents any performance dgredations reaching production.
+
+\section{Websockets}
+
+Websockets are a TCP based protocol\cite{8089962}. There have been a number of patterns and methods used in the past to simulate real-time communication. These include both polling and long polling. With polling, a client would make a request to a server continuously every few seconds. This method of communication had some drawbacks. It required connections to make a TCP handshake every time it reconnected. This handshake is costly as it takes a number of milliseconds to initiate. This is not a huge deal with just one connection. However when this is scaled up to hundreds of thousands of users then this TCP handshake will really impact a system\cite{5735801}. HTTP handshakes involve sending a SYN packet to the server which response with a SYN ACK to acknowledge the request then the client sends another SYN packet and connection is then established\ref{fig:http-handshake}\cite{5735801}. HTTP(s) further complicates the process as now the communication takes place over TLS (Transport Layer Security)\ref{fig:https-handshake}. 
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{figures/http-handshake.png}
+    \caption{HTTP handshake}
+    \label{fig:http-handshake}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{figures/https-handshake.png}
+    \caption{HTTP(s) handshake over TLS}
+    \label{fig:https-handshake}
+\end{figure}
+
+Long polling tries to address this issue by making a request from the client to the server. The server then keeps the connection open for a specified amount of time. The server will wait for new information to arrive from somewhere. If data arrives before the connection times out then the connection is immediately terminated and the data is sent to the client. If no data has arrived by the time the connection times out then the connection is terminated and no data is sent to the client. In both cases the client will then reconnect and wait for more data to arrive. As specified in \cite{6364271}, long polling has one drawback in real time communication systems in that it needs more than one connection to achieve bi-directional communication.
+
+There has been a huge shift from desktop devices to mobile devices\cite{6365155}. It has been proven that communication methods such as polling and long polling can have a negative affect on the batter life of mobile devices\cite{6364271}. This is due to the continuous connection and re-connection cycles, which are further exasperated by the fact that most of these connections are over cellular networks.
+
+WebSockets aim to try and fix a lot of these shortcomings. This includes the ability to have full-duplex communication over a single persisted connection. WebSocket support is available in all major browsers, including mobile browsers. Once a connection is established between a server and a client, then both can communicate freely with each other by sending data encapsulated within a frame plus 2 extra bytes of payload, which is a huge reduction in payload from HTTP requests. There are 2 main stages to establishing and sending data over websockets. These include the handshake stage, which like polling and long polling is done over HTTP. The reason this is done over HTTP is because websocket protocols are built on top of HTTP. They also had backward compatibility in mind with HTTP in that you can send a GET request to a websocket server and the server will send back an UPGRADE request telling the client that communication over a websocket protocol is available. The client can then decide whether to upgrade or not.
+
+\subsection{Resource Usage}
+
+Websockets have been proven to require less system resources for real-time communication than polling and long polling. A study which done a comparative analysis of AJAX polling versus websockets found that polling increases the memory consumption over time compared to websockets which maintained a fairly constance memory consumption throughout\cite{6601579}. In terms of bandwidth usage when comparing polling versus websockets it was concluded that polling uses a larger amount of bandwidth over time, the reason for this was that polling required 256 bytes of extra data to be sent over the wire even if that 256 bytes of data is not used up, this means that in some cases there is can be a lot of white space sent over the network. The second reason was that the header data required for polling is significantly larger than that of a websockets header\cite{6601579}.
+
+\subsection{Keep Alive Mechanisms}
+
+Because WebSocket servers can hold potentially hundreds of thousands of connection open simultaneously, it is reasonable that the server may want to recycle some of these connections to prevent itself from becoming overloaded. Websockets support a keep alive mechanism to tell the server that the client is still actively using the connection. This is done in the form of a PING/PONG request. The server will send a ping request to the client, if the client is still active then it will respond with a pong. If the client does not respond then the server is free to terminate the connection and freeing up some resources in the process. 
+
+\subsection{Websockets in a microservices environment}
+
+Microservice architectures compliment websockets in a number of ways. In front of most microservice environments is an api gateway\cite{6885428}. This is a reverse proxy between a companies API layer and the the end user. It acts as security barrier preventing the user from having direct access to any of the underlying API's. Nginx is an example of a reverse proxy with websocket support. When a websocket connection is created Nginx will stream the websocket request onto the target service, then data will flow from the service through the gateway to the users client. 
+
+While microservices do well to compliment websockets, there are sadly cases where a microservice can be difficult for websockets. Scaling applications is one such situation. Scaling means having multiple instances of the same service running at the same time with a load balancer in front which can chose the healthiest instance of a service to route requests to. Load balancing websockets can be a tricky task depending on how the websocket server is set up. The issue is that when you connect to a service, that connection is long lived, if there is a drop in connection and the websocket server re-connects then it is possible that the new connection may be connected to a different instance of the server the websocket was previously connected to. For this reason it is good practive to make websocket servers stateless. Best practictes suggest connecting the service to a backend queue such as RabbitMQ, Apache Kafka or Redis. This way of a websocket connection is dropped it will matter less which instance the reconnection request connects to.
+
+
+\section{Monitoring}
+
+As mentioned briefly in Chapter 1 monitoring of microservices can be a difficult task. This is due to the distributed nature of microservices. Monitoring can take many forms, such as resource monitoring or usage monitoring or log monitoring. with resource monitoring we are trying to track the amount of CPU and memory usage or number of disk input out jobs over a period of time. This is a powerful metric if utilized correctly. Companies such as Netflix and Facebook, use a method known as AB testing. With AB testing we can introduce new services that are meant to replace an existing service. For example, if there is a service that recommends shows to watch, which is a service Netflix provides. If developers want to rewrite this service in a new language, they can do this and then deploy the new service side by side with the existing service. The new service would accept the same inputs as the existing service however the outputs would only be persisted from the existing service. The developers can then monitor resources over a period of time, if they see that the new service is using less resources than the existing service, this can be used as evidence to determine that the new service is a suitable replacement.
+
+Usage monitoring on the other hand may involve tracking the amount of users that visit our services. In the case of a web application this can be the number of users that have visited our website. To get the most out of this most monitoring tools allow the ability to break the visitor usage down into what routes they have visited. For example if we have a route in our web application that is for listing friends of a user, we could track if this route is being used or not. This type of tracking is very valuable as it can be used to determine if the features of an application are providing value to a user. NewRelic is a tool which provides this service as a cloud offering. With NewRelic, developers need to install an agent into their code. This agent will then communicate with the NewRelic service and store usage statistics. 
+
+Log monitoring in microservices is difficult. As mentioned in Chapter 1 this is again due to the distributed nature of microservices. Developers are no longer dealing with one single log, they are instead dealing with a log from each connected service in the system. With larger environments, debugging systems can prove a laborious task. One common way that companies use to provide an easier debugging experience is to use a central log aggregator. With this, all logs from each of the services are forwarded to the central log service. One of the most common platforms for log aggregation is the ELK stack. which is short for Elasticsearch, Logstash and Kibana. These are 3 individual open source tools, however they can be combined to make a powerful log aggregation tool. ElasticSearch is a distibuted search and analytics engine, it can be used to index any form of data for later searching. Logstash is a lightweight data processing pipeline tool that can accept data from a number of sources and finally kibana lets developers visualize search queries in elastic search and provides a powerful user interface. With the ELK stack in place, developers can search for keywords such as "ERROR" or "CRASH" that occurred in logs in a specific time frame, making debugging systems less monotonous. Logz.io is an example of a company who have taken this one step further. They have combined machine learning that can scan and make sense of each log input. Their system can actively inform developers of anything it finds in their logs that it has marked as interesting or potentially fatal. This reduces the workload of developers while debugging systems.
+
+\section{Websockets}
+
+\section{Docker}
+
+Docker is a tool that allows developers to create, deploy and run applications which are distributed as containers. Docker is often compared to virtualization tools such as virtualbox and VmWare Fusion. We believe this comparison to be incorrect, the key difference being that virtualized run on top of a hypervisor which is running on top of a guest operating system, the running virtual machine has its own operating system such as Linux or Windows with its own memory management system. It is also possible to have multiple virtual machines running at the same time on a single machine. In comparison docker containers do not use a hypervisor, they are instead executed using the docker engine. Containers are considerably smaller and use less resources than virtual machines as well as having much faster start up times. Because of this docker containers are being starting to be used for tasks such as integration testing.
+
+Without docker there was no real way to test an applications integration with a database such as MySql. When developers wrote tests they usually used an in memory database such as H2. For example if we are building a web application that has a rest endpoint for create a shopping list we could write an integration test that would start the application and make a http request to this endpoint and check if the endpoint stores our shopping list correctly. As the application is starting it would also start the in memory H2 database. If the test passes we have some assurance that when our application reaches a production environment that it will just work. However, in reality this is not always the case. In memory databases like H2 are not 100\% compatible with MySql, that being, some queries that work on H2 will not work on MySql and vice versa. Docker on the other hand allows developers to start a real MySql server within a docker container for the duration of the integration test. Once the test completes the container is thrown away, ensuring that new tests will be using a completely fresh database. There are a number of libraries available that make starting and stopping of containers easy, such as \href{https://www.testcontainers.org/}{TestContainers} for Java and NodeJs.
+
+\section{Kubernetes}
+
+While docker can be useful for testing it is also a production ready tool and works well in a microservice architecture. Docker Swarm and kubernetes are the two main docker container orchestration tools on the market today. Docker Swarm was originally developed by docker themselves. This allows docker containers to be spread over a number of virtual or real machines, while docker swarm would handle all network activity between each of the containers by utilizing its own DNS server. Kubernetes was originally designed by Google, the project was originally called Borg while later changing to be called Kubernetes. Kubernetes was made open source by Google in 2014. It has mmany of the same features that docker swarm has including network and DNS. Kubernetes is also available as a cloud offering from GKE (Google Kubernetes Engine). 
+
+Both Docker Swarm and Kubernetes allow to define microservices or infrastructure as code. For example if we are building a microservices, we can define each of these microservices and the networking between them as code. This code can then be distributed to allow for repeatable environments. In the case of docker swarm this code is defined in a file called docker-compose.yml. For kubernetes there is a package manager called Helm which uses YAML files to orchestrate the environment.
+
+\section{Cloud Foundry}

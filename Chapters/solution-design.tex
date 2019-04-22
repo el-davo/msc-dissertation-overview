@@ -4,7 +4,8 @@ For this project we have utilized the following technologies extensively.
 
 \begin{itemize}
   \item NodeJS (Loopback 4, WS and GraphQL)
-  \item Angular 7 with Highcharts
+  \item Angular 7
+  \item Highcharts
   \item Docker
   \item Kubernetes
   \item MySQL
@@ -18,6 +19,12 @@ There are a few terms going forward that need to be defined. Below is an explana
   \item \emph{JWT} stand for JSON Web Token is an open standard \href{https://tools.ietf.org/html/rfc7519}{RFC 7519} for securely transmitting data between 2 places in JSON format. For the purposes of this project we will be using it for user authentication.
 \end{itemize}
 
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/architecture.png}
+    \caption{Architecture of the ws-flare platform}
+    \label{fig:https-handshake}
+\end{figure}
 
 The project has been split up into a number of microservices to allow for maximum code readability and test-ability. The following microservices have been developed to make up the system.
 
@@ -37,35 +44,35 @@ The project has been split up into a number of microservices to allow for maximu
 
 \subsection{ws-flare-ui}
 
-This service is written in Angular 7. It holds all the code for displaying the user interface to a user. We also use Highcharts.js as a charting library for displaying results. The user interface is extensively tested using Jest testing framework from FaceBook.
+This service is written in Angular 7. It holds all the code for displaying the user interface to a user. We also use Highcharts.js as a charting library for displaying results.
 
 \subsection{ws-flare-user-api}
 
-Holds all user authentication information, such as email, user-name and passwords. For making authentication requests we are using JWT tokens to allow a user to query the system. Without this security any user could utilize the system to attack websites so it is important that we have this layer of security. This service is using MySQL for persisted storage. This service is tested using the mocha testing framework for NodeJS.
+Holds all user authentication information, such as email, user-name and passwords. For making authentication requests we are using JWT tokens to allow a user to query the system. Without this security any user could utilize the system to attack websites so it is important that we have this layer of security.
 
 \subsection{ws-flare-projects-api}
 
-The system allows users to create projects to logically separate each task. This is more for user convenience and adds to the overall UX aesthetics's of the system. All project and task information is stored within this service. This service uses MySQL as persisted storage. This service is also tested using the mocha testing framework for NodeJS.
+The system allows users to create projects to logically separate each task. This is more for user convenience and adds to the overall UX aesthetics's of the system. All project and task information is stored within this service. 
 
 \subsection{ws-flare-jobs-api}
 
-This service holds information about currently running jobs. The system allows for running multiple jobs at the same time to allow to be truly embedded into continuous integration environments. This service is using MySQL for persisted storage. This service is tested using the mocha testing framework for NodeJS.
+This service holds information about currently running jobs. The system allows for running multiple jobs at the same time to allow to be truly embedded into continuous integration environments. This service is using MySQL for persisted storage. 
 
 \subsection{ws-flare-orchestation-api}
 
-This service handles the orchestation of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested websocket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications. This service has no long term persisted storage mechanism and is testing using the mocha test framework for NodeJS.
+This service handles the orchestation of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested websocket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications.
 
 \subsection{ws-flare-cloud-foundry-monitor-api}
 
-This service stores information related to running applications on Cloud Foundry, such as memory and CPU at a particular point in time. This service is using MySQL for persisted storage. This service is tested using the mocha testing framework for NodeJS.
+This service stores information related to running applications on Cloud Foundry, such as memory and CPU at a particular point in time. This service is using MySQL for persisted storage. 
 
 \subsection{ws-flare-test-client}
 
-This is an application that can be spun up as a Kubernetes pod. The goal of this application is to simulate a number of websocket connections. A limit of 1000 connections per pod has been specified. For example if we have a test that requires a simulation of 5046 users then 6 ws-flare-test-client pods will be created. Five of those will simulate 1000 connections and the sixth will simulate 46 connections. Together they will simulate the full 5046 connections. For each of the connections established the connection information will be stored within the ws-flare-jobs-api service. The service will contain information on how many connections were successfully established, how many connections have dropped, and how many connections have not connected. We will also store the amount of time or latency it tool to connect to the websocket server. Once the stress test has completed this application will instruct Kubernetes to delete itself. Kubernetes will then proceed to remove the pod. This service has no long term persisted storage mechanism and is testing using the mocha test framework for NodeJS.
+This is an application that can be spun up as a Kubernetes pod. The goal of this application is to simulate a number of websocket connections. A limit of 1000 connections per pod has been specified. For example if we have a test that requires a simulation of 5046 users then 6 ws-flare-test-client pods will be created. Five of those will simulate 1000 connections and the sixth will simulate 46 connections. Together they will simulate the full 5046 connections. For each of the connections established the connection information will be stored within the ws-flare-jobs-api service. The service will contain information on how many connections were successfully established, how many connections have dropped, and how many connections have not connected. We will also store the amount of time or latency it tool to connect to the websocket server. Once the stress test has completed this application will instruct Kubernetes to delete itself. Kubernetes will then proceed to remove the pod.
 
 \subsection{ws-flare-cloudfoundry-monitor-client}
 
-This is another application that is spun up as a Kubernetes pod. Once it is created it will immediately attempt to connect to the specified Cloud Foundry instance. There it will attempt to find the applications that the user requested to monitor. Once the correct applications have been found this application will send a message back to ws-flare-orchestation-api over a rabbitMQ message queue informing it that it has found the correct applications and is ready to start monitoring. The application will then wait for the orchestration API to create the necessary clients to simulate the Websockets. While the test is in progress the application will actively communicate with the Cloud Foundry instance to interrogate it for applications statistics such as memory and CPU usage. It will also get information from each instance of the application deployed on cloud foundry. Once all tests have completed this application will then shut itself down by instructing kubernetes to kill itself. Kubernetes will then remove the pod. This service has no long term persisted storage mechanism and is testing using the mocha test framework for NodeJS.
+This is another application that is spun up as a Kubernetes pod. Once it is created it will immediately attempt to connect to the specified Cloud Foundry instance. There it will attempt to find the applications that the user requested to monitor. Once the correct applications have been found this application will send a message back to ws-flare-orchestation-api over a rabbitMQ message queue informing it that it has found the correct applications and is ready to start monitoring. The application will then wait for the orchestration API to create the necessary clients to simulate the Websockets. While the test is in progress the application will actively communicate with the Cloud Foundry instance to interrogate it for applications statistics such as memory and CPU usage. It will also get information from each instance of the application deployed on cloud foundry. Once all tests have completed this application will then shut itself down by instructing kubernetes to kill itself. Kubernetes will then remove the pod.
 
 \subsection{ws-flare-graphql}
 
@@ -369,3 +376,44 @@ ws.on('error',  () => console.log('Connection failed'));
 
 ws.on('close' => console.log('Connection dropped'));
 \end{minted}
+
+\subsection{Testing tools used}
+
+Test Driven Development was used extensively throughout this project. The following tools were used for testing the various applications in the ws-flare system.
+
+\begin{itemize}
+  \item Yarn package manager for NodeJS 
+  \item Mocha testing framework for NodeJS
+  \item Docker for simulating MYsql and RabbitMQ
+  \item CypressJS for end to end testing the user interface
+  \item Jest for unit testing the user interface
+  \item nyc for measuring typescript code coverage
+\end{itemize}
+
+For packaging each service into a docker container we made use of \href{https://travis-ci.org/}{travis-ci} as an a countinuous integration pipeline. This tool is popular in the open source community and integrates well with GitHub which is the source code repository used for this project. When changes are made to any of the services travis-ci will automatically detect the changes and begin a build. Travis will detect if you have a .travis-ci.yaml configuration file on the root of your project. An example of a travis configuration file is outlined below.
+
+\begin{minted}[breaklines]{yaml}
+language: node_js
+node_js:
+  - '8'
+services:
+  - docker
+install:
+  - yarn --ignore-engines
+  - docker pull mysql:5
+script:
+  - yarn test
+  - docker build -t wsflare/ws-flare-projects-api:\$TRAVIS_BUILD_NUMBER .
+
+after_success: yarn coverage
+
+deploy:
+  - provider: script
+    script: docker login -u "\$DOCKER_USERNAME" -p "\$DOCKER_PASSWORD" && docker push wsflare/ws-flare-projects-api
+    on:
+      branch: master
+\end{minted}
+
+The build goes through a number of steps. First it will install all dependencies of the service using yarn package manager. Next it will run all tests, failing the build if any test fails. Next it will run a docker build which attempts to put our application into a docker container. Once this completes successfully travis will release the docker container to docker hub which is an public registry for docker containers. From there the docker container can be pulled into any project which is using docker or Kubernetes.
+
+For monitoring code coverage this project uses a cloud offering called \href{https://coveralls.io/}{coveralls}. This integrates with travis-ci. Code overage metrics are gathered during builds and sent to coveralls for analysis. Coveralls then summarises the code coverage for the project gives and overall code coverage metric ranging from 0 to 100\%. Coveralls is free to use with open source projects.

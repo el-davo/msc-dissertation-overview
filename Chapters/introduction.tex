@@ -1,0 +1,46 @@
+\chapter{Introduction}
+\lhead{\emph{Introduction}}
+
+Microservice architectures have been widely adopted over the past decade. Monolithic architectures require all code to be compiled into one single artifact. In contrast, applications built using a microservice architecture decompose the key parts of monolithic applications into smaller independent services. 
+
+Microservice architectures are easier to scale than their monolithic counterparts. If developers detect that a service is under heavy load they can add more instances of that particular service, this is known as horizontal scaling. For a monolithic application to scale a developer would have to add more instances of the entire application, this is known as vertical scaling. 
+
+Monolithic architectures are usually written in one programming language, this can be problematic as there is no one language that is suitable for every use case. Once developers have committed to using one language it is very hard to back out and use another language should requirements change. With microservices, developers have more freedom, if requirements change they can easily add new services written in a different language, and because services can be very small in size it is not uncommon to re-write services from scratch using a new language that makes sense to the new requirements.
+
+In terms of agility microservices are widely accepted to be more in line with agile practices than monolithic architectures. This is due to the high degree of decoupling between services. In many companies there may be a single team assigned to one service.
+
+Microservices do have some disadvantages. In larger applications there may be hundreds of services running. This makes automated monitoring of services very difficult when compared to monolithic applications which require monitoring a single service. A similar problem arises for debugging of applications. In a monolithic architecture a developer only needs to view a single log file file, however in a microservice architecture they will need to view log files coming from many services. 
+
+Traffic monitoring is another problem for microservices. An example of this would be in a web application. If a user connects to our web interface, they may make a network request to login to the application. The network request may come into the microservice system and be forwarded on to any number of services before responding to a users request. Tracing the flow of network requests through the system and seeing how each service along the way is affected is important to maintaining a healthy, scalable system. 
+
+Test driven development (TDD) in microservice architectures is a good way to try and circumvent some of these problems. By utilizing TDD, developers have re-assurance that what they are releasing to production environments is in working order. TDD comes in a variety of forms, such as unit, integration and end-to-end testing. There is also another form of testing known as stress testing which is the focus of this paper. 
+
+Stress testing involves simulating a number of users to see if a system can handle certain loads. This is an important metric for developers. Without this testing in place, developers have no re-assurance that the system they are building can handle the number of users they are expecting. Without stress testing, it is highly likely that system will experience outages, which can lead to financial loss.
+
+There are many tools available for stress testing applications. Apache JMeter is one such tool. These tools offer the ability to simulate many users. They can summarize the limits of an application such as how many requests made successful connections and how many requests failed. While this is useful it does not give any insights into how services within a microservice architecture have reacted to the test. We feel that a tool that could do both stress testing and can also give insights into how microservices react to tests would give developers a much better understanding of their design as well as making debugging a simpler process.
+
+As part of this research paper we have developed a tool which can stress test websockets deployed in a microservice environment which can also monitor services individually within a microservice system. Throughout this paper we will summarize the main parts of this tool, how it was built and present our final results.
+
+\section{Motivation}
+
+To the best of our knowledge their are no tools on the market, that can combine both stress testing and monitoring of a microservice environment. The main beneficiaries of this tool are developers utilizing websockets who wish to gain deeper insights into how large user bases will affect their systems. As more companies adopt agile methodologies such as continuous delivery, there is a greater need to actively test their software before it reaches production to prevent any degradation in performance.
+
+The second motivation of building this tool is to easily allow developers adopt stress testing tools. Testing methods such as unit tests and integration tests are widely used, however in many cases stress testing is often seen as an after thought. In our experience this has held true, and is only considered when the worst case scenario occurs and production environments are down for hours or days leading to financial loss.
+
+\section{Research Questions and Objectives}
+
+\subsection{Research Question}
+
+With the ever growing importance of websockets in a microservice environment as will be described in Chapter 2. We believe it is important to actively stress test these websocket implementations. The aim of this project is to create a websocket stress testing tool that can also monitor microservice environments and each of the underlying services in order to give developers a greater understanding of how high user load can affect their environments.
+
+\subsection{Research Objectives}
+
+\begin{itemize}
+  \item To develop a websocket stress testing tool that can also monitor microservice environments.
+  \item Summarize results of a test to a developer using an intuitive interface.
+  \item Test the system using a variety of WebSocket server implementations. Using GoLang, NodeJS and Elixir to see how scalable the platform.
+\end{itemize}
+
+\subsection{Structure of this document}
+
+Chapter 1 describes the overall objects of this research thesis while introducing microservices and how many companies are adopting this architecture over monolithic architectures. Chapter 2 will detail the background research into the various technologies that will be utilized for building this system. This will mainly detail microservices and websockets and how they have evolved over time. Chapter 3 will describe how the stress testing tool was put together, detailing the technologies used and the motivation behind each chosen technology. Chapter 4 will detail the results of developing the stress testing tool as well as giving a comparison of each of the various websocket implementation's between different languages. Chapter 5 will discuss the conclusions and finding of this research as well as detailing future work.
