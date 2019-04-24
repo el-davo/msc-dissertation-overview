@@ -1,16 +1,30 @@
 \chapter{Solution Design and Implementation}
 
+This chapter describes the architecture that was designed for this project. In the first part of this chapter we will discuss each of the individual parts of the overall functioning stress test platform .In the later stages of this chapter we will present some of the more relevant code snippets that make up the system and discuss how test driven development helped us achieve the goal of creating this platform. Throughout this chapter you will see the term ws-flare used, this is because We have given the platform the name ws-flare which is short for WebSocket flare.
+
+\section{Technologies used}
+
 For this project we have utilized the following technologies extensively.
 
 \begin{itemize}
-  \item NodeJS (Loopback 4, WS and GraphQL)
+  \item NodeJS (Loopback 4)
   \item Angular 7
   \item Highcharts
   \item Docker
   \item Kubernetes
+  \item Websockets
   \item MySQL
   \item RabbitMQ
+  \item GraphQL
 \end{itemize}
+
+\subsection{NodeJS (Loopback 4)}
+
+NodeJS was chosen for this project because of our own particular expertise with NodeJS. We were also concerned with using high memory consumption languages such as Java in this project as we would be running this application on a kubernetes cluster. The main financial costs when it comes to kubernetes or any cloud offering is memory and cpu usage. The more reources that are in use, the more the cost of running the platform will be. NodeJS on the other hand is much more lightweight. We found that 30 Megabytes of memory is more than enough to run a single microservice in this platform. 
+
+We are also using a web framework called Loopback 4. This framework is written in typescript and has in built support for test driven development.
+
+\section{Architecture}
 
 There are a few terms going forward that need to be defined. Below is an explanation of these terms
 
