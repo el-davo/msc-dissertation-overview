@@ -1,9 +1,9 @@
 \begin{abstract}
 
-Websockets have emerged as a leading technology in real-time communication systems. They allow for multi-duplex communication between systems.
+Microservice architectures have become immensely popular in recent years. They allow developers to split business critical components into loosely coupled services, allowing teams to adopt agile methodologies such as dev-ops, continuous delivery and test driven development for validation.
 
-Many companies have made a switch to microservice architectures. This presents some new challenges when integrating websockets into a microservice environment. Websockets are now speaking to different services behind the scenes. Developers need to know how their microservice environment reacts efficiently with minimal latency under certain loads when utilizing websockets. Many companies opt to use a PaaS (Platform as a service) to help them easily scale their applications. There are a number of PaaS systems on the market such as Pivotals Cloud Foundry, IBM Bluemix and GKE (Google Kubernetes Engine). These platforms expose powerful API's to gain insights into applications running on them.
+In our experience one of the lesser used forms of validating microservices is stress testing. This form of testing is often regarded as an after thought until it becomes a critical issue. Possible reasons for this include the infrastructure required for performing stress testing goes well beyond that of other forms of testing, such as unit testing or integration testing. Stress testing usually requires the need for a lot of hardware which can be costly.
 
-The aim of this project is to create a websocket stress testing tool that can utilize Cloud Foundry's API in order to give developers a snapshot of how their entire microservice environment reacts under certain conditions.
+In this project we present a new stress testing tool that we have developed that can validate and monitor services within a microservice architecture. This tool can currently stress test WebSocket protocols, however we hope in the future this can be expanded for testing other protocols.
 
 \end{abstract}

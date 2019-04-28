@@ -1,2 +1,300 @@
 \chapter{Results and Observations}
 \lhead{\emph{Results and Observations}}
+
+In this section the we will present the results of the experiments that we have conducted. For each experiment we will outline how the the experiment was setup, what technologies we are testing and also give an unbiased overview of the data gathered.
+
+\section{Stress Testing}
+
+For the first experiment we will be conducting a number of stress tests on three separate programming language WebSocket implementations. The implementation of each WebSocket server will be the vanilla example given from each of the implementations GitHub pages. Each of the experiments in this section will be using the  kubernetes setup as shown in table \ref{table:kubernetes-setup-experminent-1}
+
+\begin{table}[H]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llll}
+\rowcolor[HTML]{ECF4FF} 
+Machine Type          & Nodes & Total VCpus & Total Memory \\
+small (1 Shared VCpu) & 10    & 10          & 16.99GB     
+\end{tabular}%
+}
+\caption{Kubernetes Setup}
+\label{table:kubernetes-setup-experminent-1}
+\end{table}
+
+\subsection{NodeJS Websocket Server}
+
+For NodeJS we will be using a popular library called WS. The code for the server is outlined in code section \ref{table:nodejs-server-experiment-1}
+
+\begin{listing}[H]
+    \caption{NodeJS Websocket Server Implemntation}
+    \label{table:nodejs-server-experiment-1}
+    \begin{minted}{Javascript}
+const http = require('http');
+const WebSocket = require('ws');
+
+console.log('Starting ws server');
+
+const server = http.createServer();
+const wss = new WebSocket.Server({noServer: true});
+
+wss.on('connection', (ws) => {
+    console.log('new connection');
+
+    ws.on('close', () => {
+        console.log('connection dropped');
+    });
+});
+
+server.on('upgrade', function upgrade(request, socket, head) {
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+        wss.emit('connection', ws, request);
+    });
+});
+
+server.listen(process.env.PORT || 3000);
+\end{minted}
+\end{listing}
+
+The NodeJS server as listed in \ref{table:nodejs-server-experiment-1} code required to handle HTTP upgrades to websocket manually as Cloud Foundry does not automatically handle the HTTP upgrade.
+
+The NodeJS WebSocket server is deployed on cloud foundry with the resource limits specified in table \ref{table:cf-resource-limits-1}
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+1         & 64MB                     
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-limits-2}
+\end{table}
+
+The initial test will use the following ws-flare script to simulate 1000 users over a period of 60 seconds
+
+\begin{listing}[H]
+    \caption{WS-Flare test script for 1000 users}
+    \label{table:nodejs-server-experiment-1}
+    \begin{minted}{json}
+[
+    {
+        "start": 0,
+        "timeout": 60,
+        "totalSimulators": 1000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    }
+]
+\end{minted}
+\end{listing}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-1000.png}
+    \caption{Results of simulating 1000 websockets}
+    \label{fig:experiment-1-conn-summary-1000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-1000.png}
+    \caption{Memory consumption of websocket server testing 1000 connections}
+    \label{fig:experiment-1-memory-1000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-1000.png}
+    \caption{CPU consumption of websocket server testing 1000 connections}
+    \label{fig:experiment-1-cpu-1000}
+\end{figure}
+
+As can be seen from figure \ref{fig:experiment-1-conn-summary-1000} simulating 1000 users has a 100\% success rate.
+
+In figure \ref{fig:experiment-1-memory-1000} and figure \ref{fig:experiment-1-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the websockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all connections have been made we then see the CPU return to 0\% usage. 
+
+\subsubsection{5000 Connections}
+
+1000 users connecting at the same time is a good expectation for websites that are not expecting a lot of traffic. Lets increase this to 5000 users using the script in listing \ref{table:nodejs-server-experiment-2}
+
+\begin{listing}[H]
+    \caption{WS-Flare test script for 5000 users}
+    \label{table:nodejs-server-experiment-2}
+    \begin{minted}{json}
+[
+    {
+        "start": 0,
+        "timeout": 60,
+        "totalSimulators": 5000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    }
+]
+\end{minted}
+\end{listing}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-5000.png}
+    \caption{Results of simulating 5000 websockets}
+    \label{fig:experiment-1-conn-summary-5000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-5000.png}
+    \caption{Memory consumption of websocket server testing 5000 connections}
+    \label{fig:experiment-1-memory-5000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-5000.png}
+    \caption{CPU consumption of websocket server testing 5000 connections}
+    \label{fig:experiment-1-cpu-5000}
+\end{figure}
+
+After increasing the test to simulate 5000 connections we see from figure \ref{fig:experiment-1-conn-summary-5000} that initially the test reached 1710 connections. After this was reached we see a big dip in memory in figure \ref{fig:experiment-1-memory-5000} and CPU in figure \ref{fig:experiment-1-cpu-5000}. The indicates that a 64(MB) limit of memory is not enough to handle this amount of WebSocket connections. One possible solution to this is to add more instances. Through trial and error we found that to reach 5000 users successfully connecting at the same time, one of the following resources are needed on Cloud Foundry
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+4         & 64MB     \\
+1         & 256MB     
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-limits-3}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-5000-4-instances.png}
+    \caption{Results of simulating 5000 websockets with 4 instances}
+    \label{fig:experiment-1-conn-summary-5000-4-instances}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-5000-4-instances.png}
+    \caption{Memory consumption of websocket server testing 5000 connections with 4 instances}
+    \label{fig:experiment-1-memory-5000-4-instances}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-5000-4-instances.png}
+    \caption{CPU consumption of websocket server testing 5000 connections with 4 instances}
+    \label{fig:experiment-1-cpu-5000-4-instances}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-5000-256-memory.png}
+    \caption{Results of simulating 5000 websockets with 256 MB of memory}
+    \label{fig:experiment-1-conn-summary-5000-1-instances-256-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-5000-256-memory.png}
+    \caption{Memory consumption of websocket server testing 5000 connections with 256 MB of memory}
+    \label{fig:experiment-1-memory-5000-1-instances-256-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-5000-256-memory.png}
+    \caption{CPU consumption of websocket server testing 5000 connections with 256 MB of memory}
+    \label{fig:experiment-1-cpu-5000-1-instances-256-mem}
+\end{figure}
+
+Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} we see that the with 1 instance 87\% memory consumption when connections were being estanblished. However with 4 instances the cpu usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this we recommend using 4 instances instead of 1. 
+
+\subsubsection{30000 Connections}
+
+For the next experiment we attempted 30000 users connecting at the same time. Using the script in \ref{listing:nodejs-server-experiment-3}
+
+\begin{listing}[H]
+    \caption{WS-Flare test script for 5000 users}
+    \label{listing:nodejs-server-experiment-3}
+    \begin{minted}{json}
+[
+    {
+        "start": 0,
+        "timeout": 60,
+        "totalSimulators": 30000,
+        "target": "wss://ws-flare-test-server.cfapps.io:4443"
+    }
+]
+\end{minted}
+\end{listing}
+
+There will be 1 instance which is assigned a maximum of 2GB of memory as outlined in table \ref{table:cf-resource-limits-4}
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+1         & 2GB     \\ 
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-limits-4}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-30000-256-memory.png}
+    \caption{Results of simulating 30000 websockets with 256 MB of memory}
+    \label{fig:experiment-3-conn-summary-5000-1-instances-256-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-30000-256-memory.png}
+    \caption{Memory consumption of websocket server testing 30000 connections with 256 MB of memory}
+    \label{fig:experiment-3-memory-5000-1-instances-256-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-30000-256-memory.png}
+    \caption{CPU consumption of websocket server testing 30000 connections with 256 MB of memory}
+    \label{fig:experiment-3-cpu-5000-1-instances-256-mem}
+\end{figure}
+
+In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} we see that we did not reach the target of 30000 connections within the 60 second limit. Instead we reached 16365 connections. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. On 35 seconds in the CPU was at 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that this a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+5         & 512MB     \\ 
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-limits-5}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-30000-5-instances-512-memory.png}
+    \caption{Results of simulating 30000 websockets with 5 instances and 512 MB of memory}
+    \label{fig:experiment-3-conn-summary-30000-5-instances-512-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-30000-5-instances-512-memory.png}
+    \caption{Memory consumption of websocket server testing 30000 connections with 5 instances and 512 MB of memory}
+    \label{fig:experiment-3-memory-30000-5-instances-512-mem}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-30000-5-instances-512-memory.png}
+    \caption{CPU consumption of websocket server testing 30000 connections with 5 instances and 512 MB of memory}
+    \label{fig:experiment-3-cpu-530000000-5-instances-512-mem}
+\end{figure}
