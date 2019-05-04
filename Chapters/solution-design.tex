@@ -2,17 +2,20 @@
 
 This chapter describes the architecture that was designed for this project. In the first part of this chapter we will discuss each of the individual parts of the overall functioning stress test platform .In the later stages of this chapter we will present some of the more relevant code snippets that make up the system and discuss how test driven development helped us achieve the goal of creating this platform. Throughout this chapter you will see the term ws-flare used, this is because We have given the platform the name ws-flare which is short for WebSocket flare.
 
-\section{Technologies used}
+\section{Problem Definition}
+
+This project aims to develop a tool for stress testing application which can easily integrate into continuous integration environments. The tool that we have created can abstract away the complexities of stress testing, such as automatically scaling using kubernetes, as well as automatic monitoring of applications in a microservice environment, ensuring that developers have better insights into how their applications handle an abundance of users. Throughout this chapter we will present the main technologies that we used while developing this tool.
+
+\section{Technologies}
 
 For this project we have utilized the following technologies extensively.
 
 \begin{itemize}
   \item NodeJS (Loopback 4)
-  \item Angular 7
+  \item Angular
   \item Highcharts
   \item Docker
   \item Kubernetes
-  \item Websockets
   \item MySQL
   \item RabbitMQ
   \item GraphQL
@@ -23,6 +26,34 @@ For this project we have utilized the following technologies extensively.
 NodeJS was chosen for this project because of our own particular expertise with NodeJS. We were also concerned with using high memory consumption languages such as Java in this project as we would be running this application on a kubernetes cluster. The main financial costs when it comes to kubernetes or any cloud offering is memory and cpu usage. The more reources that are in use, the more the cost of running the platform will be. NodeJS on the other hand is much more lightweight. We found that 30 Megabytes of memory is more than enough to run a single microservice in this platform. 
 
 We are also using a web framework called Loopback 4. This framework is written in typescript and has in built support for test driven development.
+
+\subsection{Angular}
+
+Angular is a popular open source, single page application framework developed and maintained by Google. We use this framework extensively for building the user interface of the ws-flare framework. Angular is written in typescript and comes with a powerful testing framework called TestBed which makes developing in a test driven manner simpler.
+
+\subsection{Highcharts}
+
+In the ws-flare user interface we display many graphs for showing the results of test jobs. Highcharts is a charting library, developed by HighSoft. It is free to use for open source applications, and supports an abundance of graph types.
+
+\subsection{Docker}
+
+Each service in the ws-flare framework is built to run in a docker container. This is necessary as the framework is built to run on a kubernetes cluster which needs docker in order to function. Each service is also deployed to docker hub, which makes it easy for any company to import the framework into their environments.
+
+\subsection{Kubernetes}
+
+The ws-flare framework is built exclusively to run on kubernetes clusters. This helps with scalability issues when simulating many thousands of connections as kubernetes can run over many machines simultaneously. We also use kubernetes package manager called helm. With helm we can easily distribute the framework and companies can install it into their own infrastructure.
+
+\subsection{MySql}
+
+We use MySql as the main data persistence database within the ws-flare framework. Data includes websocket metadata such as successful, failed and dropped connections as well as data gathered during monitoring of cloud foundry services. We run MySQL in high availability mode. For this we have two instances of MySql running at the same time. One instance is for reads and the other instance is for writes. The reason for this is there are a lot of writes occurring during test runs. For example, while simulating 30000 connections, it is necessary to persist data for each connection in a short timeframe. While this is happening, users need to use the user interface to view test runs in real time. When users view the interface they are mostly reading information from the database. High availability prevents any latency when viewing the user interface.
+
+\subsection{RabbitMQ}
+
+Ws-flare is built using a distributed microservices architecture. Some services within the framework need to be able to talk to each other. RabbitMQ is a messaging queue which makes this possible. Services are able to listen to topics in RabbitMQ and other services can send messages to the topics. Once a service detects that a message has been sent they can then react to that service. Message queues are often considered as fire and forget mechanisms for sending messages. A service sends a message and does not care what will react to that message. This ensures that services are highly decoupled.
+
+\subsection{GraphQL}
+
+GraphQL is a new technology developed by FaceBook. It is built as an alternative to REST and is suited to largely decoupled microservices. In the ws-flare user interface we need to query a lot of information to display results to a developer. With REST it would be necessary to send a request to each of the relevant service on the backend and agregate the results on the user interface. With GraphQL however the user interface needs to send a query to one single service, and that service will aggregate the data coming from the other services. This makes working with many microservices much easier.
 
 \section{Architecture}
 
@@ -58,7 +89,7 @@ The project has been split up into a number of microservices to allow for maximu
 
 \subsection{ws-flare-ui}
 
-This service is written in Angular 7. It holds all the code for displaying the user interface to a user. We also use Highcharts.js as a charting library for displaying results.
+This service is written in Angula7. It holds all the code for displaying the user interface to a user. We also use Highcharts as a charting library for displaying results.
 
 \subsection{ws-flare-user-api}
 
@@ -74,7 +105,7 @@ This service holds information about currently running jobs. The system allows f
 
 \subsection{ws-flare-orchestation-api}
 
-This service handles the orchestation of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested websocket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications.
+This service handles the orchestration of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested websocket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications.
 
 \subsection{ws-flare-cloud-foundry-monitor-api}
 
@@ -90,7 +121,7 @@ This is another application that is spun up as a Kubernetes pod. Once it is crea
 
 \subsection{ws-flare-graphql}
 
-We chose to integrate GraphQL into this architecture due to its ability to easily query multiple services at the same time in one request. Due to the need to present results to the user with minimal latency we felt that this made sense, and very easy to integrate into Angular 7 using apollo-client. 
+We chose to integrate GraphQL into this architecture due to its ability to easily query multiple services at the same time in one request. Due to the need to present results to the user with minimal latency we felt that this made sense, and very easy to integrate into Angular using apollo-client.
 
 \subsection{ws-flare-gateway}
 
@@ -376,7 +407,6 @@ For connecting to a live websocket server we have chosen to utilize a popular No
   \item Successful connection over a period of time
   \item Failed connections
   \item Dropped connections
-  \item Latency in a successful connection
 \end{itemize}
 
 NodeJS ws client offers a few useful hooks when it comes to checking if a connection has successfully connected, failed or dropped. 
