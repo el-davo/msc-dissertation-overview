@@ -66,9 +66,10 @@ Instances & Memory Limit Per Instance \\
 \end{tabular}%
 }
 \caption{Cloud Foundry Resource Limits}
-\label{table:cf-resource-limits-2}
+\label{table:cf-resource-limits-1}
 \end{table}
 
+\subsubsection{Simulating 1000 connections}
 The initial test will use the following ws-flare script to simulate 1000 users over a period of 60 seconds
 
 \begin{listing}[H]
@@ -90,28 +91,28 @@ The initial test will use the following ws-flare script to simulate 1000 users o
   \centering
     \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/conn-summary-1000.png}
     \caption{Results of simulating 1000 websockets}
-    \label{fig:experiment-1-conn-summary-1000}
+    \label{fig:experiment-1-node-conn-summary-1000}
 \end{figure}
 
 \begin{figure}[H]
   \centering
     \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/memory-1000.png}
     \caption{Memory consumption of websocket server testing 1000 connections}
-    \label{fig:experiment-1-memory-1000}
+    \label{fig:experiment-1-node-memory-1000}
 \end{figure}
 
 \begin{figure}[H]
   \centering
     \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-1000.png}
     \caption{CPU consumption of websocket server testing 1000 connections}
-    \label{fig:experiment-1-cpu-1000}
+    \label{fig:experiment-1-node-cpu-1000}
 \end{figure}
 
-As can be seen from figure \ref{fig:experiment-1-conn-summary-1000} simulating 1000 users has a 100\% success rate.
+As can be seen from figure \ref{fig:experiment-1-node-conn-summary-1000} simulating 1000 users has a 100\% success rate.
 
-In figure \ref{fig:experiment-1-memory-1000} and figure \ref{fig:experiment-1-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the websockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all connections have been made we then see the CPU return to 0\% usage. 
+In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment-1-node-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the websockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all connections have been made we then see the CPU return to 0\% usage. 
 
-\subsubsection{5000 Connections}
+\subsubsection{Simulating 5000 Connections}
 
 1000 users connecting at the same time is a good expectation for websites that are not expecting a lot of traffic. Lets increase this to 5000 users using the script in listing \ref{table:nodejs-server-experiment-2}
 
@@ -210,7 +211,7 @@ Instances & Memory Limit Per Instance \\
 
 Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} we see that the with 1 instance 87\% memory consumption when connections were being estanblished. However with 4 instances the cpu usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this we recommend using 4 instances instead of 1. 
 
-\subsubsection{30000 Connections}
+\subsubsection{Simulating 30000 Connections}
 
 For the next experiment we attempted 30000 users connecting at the same time. Using the script in \ref{listing:nodejs-server-experiment-3}
 
@@ -297,4 +298,150 @@ Instances & Memory Limit Per Instance \\
     \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/node-js/cpu-30000-5-instances-512-memory.png}
     \caption{CPU consumption of websocket server testing 30000 connections with 5 instances and 512 MB of memory}
     \label{fig:experiment-3-cpu-530000000-5-instances-512-mem}
+\end{figure}
+
+\subsection{GoLang WebSocket Server}
+
+To test a golang server we wrote a small application using a library called gorilla websocket. The code for this can be seen in listing \ref{listing:golang-server-experiment-1}
+
+\begin{listing}[H]
+    \caption{GoLang Websocket Server Implementation}
+    \label{listing:golang-server-experiment-1}
+    \begin{minted}{go}
+package main
+
+import (
+	"flag"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+)
+
+var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
+
+var upgrader = websocket.Upgrader{} // use default options
+
+func echo(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer c.Close()
+	for {
+		mt, message, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+		log.Printf("recv: %s", message)
+		err = c.WriteMessage(mt, message)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+	}
+}
+
+func main() {
+	flag.Parse()
+	log.SetFlags(0)
+	http.HandleFunc("/echo", echo)
+	log.Fatal(http.ListenAndServe(*addr, nil))
+}
+\end{minted}
+\end{listing}
+
+\subsubsection{Simulating 1000 connections}
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+1         & 64MB     \\ 
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-golang-1000-64}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/conn-1000-64-memory.png}
+    \caption{Results of simulating 10000 websockets with 64 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-conn-1000-64}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/memory-1000-64.png}
+    \caption{Memory consumption of websocket server testing 1000 connections with 1 instances and 64 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-memory-1000-64}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/cpu-1000-64.png}
+    \caption{CPU consumption of websocket server testing 1000 connections with 1 instances and 64 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-cpu-1000-64}
+\end{figure}
+
+Much like NodeJs, the GoLang server had no trouble handling 1000 simultaneous connections. It is worth noting however that the connections for NodeJs connected faster than with GoLang. Figure \ref{fig:experiment-1-node-conn-summary-1000} shows that all connections in less than 1 second while figure \ref{fig:experiment-1-golang-conn-1000-64} shows that it took 10 seconds longer for all 1000 connections to connect when using GoLang.
+
+\subsubsection{Simulating 5000 connections}
+
+Through experimentation we found that either of the resources defined in table \ref{table:cf-resource-golang-5000} were needed in order to reach 5000 simultaneous connections.
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+3         & 64MB     \\ 
+1         & 256MB
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-golang-5000}
+\end{table}
+
+For a single instance this remains the same as what we saw for NodeJs in table \ref{table:cf-resource-limits-3}. However for multiple instances we see that we can use one less instance than NodeJs. 
+
+\subsubsection{Simulating 30000 connections}
+
+Reaching 30000 connections to a GoLang websocket server could not be achieved. The resources in \ref{table:cf-resource-golang-30000} were used. However, the most that could be achieved was 26000 connections. And a lot of these connections dropped after a few seconds as can be seen in figure \ref{fig:experiment-1-golang-conn-30000-512-10}. NodeJs performed better when simulating 30000 connections. This seems to suggest that GoLang websockets perform better when there are fewer connections however the performance degrades as more connections are added. Figure \ref{fig:experiment-1-golang-cpu-30000-512-10} also suggests that CPU for the golang webserver remains stable no matter how many connections there are.
+
+\begin{table}[H]
+\resizebox{0.7\textwidth}{!}{%
+\begin{tabular}{ll}
+\rowcolor[HTML]{ECF4FF} 
+Instances & Memory Limit Per Instance \\
+10         & 512MB     \\
+\end{tabular}%
+}
+\caption{Cloud Foundry Resource Limits}
+\label{table:cf-resource-golang-30000}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/conn-30000-512-10.png}
+    \caption{Results of simulating 30000 websockets with 10 instances and 512 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-conn-30000-512-10}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/memory-30000-512-10.png}
+    \caption{Memory consumption of websocket server testing 1000 connections with 10 instances and 512 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-memory-30000-512-10}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-1/golang/cpu-30000-512-10.png}
+    \caption{CPU consumption of websocket server testing 30000 connections with 10 instances and 512 MB of memory using GoLang server}
+    \label{fig:experiment-1-golang-cpu-30000-512-10}
 \end{figure}
