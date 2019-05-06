@@ -3,7 +3,7 @@
 
 In this section the we will present the results of the experiments that we have conducted. For each experiment we will outline how the the experiment was setup, what technologies we are testing and also give an unbiased overview of the data gathered.
 
-\section{Stress Testing}
+\section{Stress Testing Multiple Language Implementations}
 
 For the first experiment we will be conducting a number of stress tests on three separate programming language WebSocket implementations. The implementation of each WebSocket server will be the vanilla example given from each of the implementations GitHub pages. Each of the experiments in this section will be using the  kubernetes setup as shown in table \ref{table:kubernetes-setup-experminent-1}
 
@@ -445,3 +445,136 @@ Instances & Memory Limit Per Instance \\
     \caption{CPU consumption of websocket server testing 30000 connections with 10 instances and 512 MB of memory using GoLang server}
     \label{fig:experiment-1-golang-cpu-30000-512-10}
 \end{figure}
+
+\section{Testing Backend With Multiple Services}
+
+To test the ability to monitor multiple services at the same time using the the ws-flare framework, we created 3 microservices written in NodeJS. The first microservice is a websocket server as shown in listing \ref{listing:experiment-2-cluster-websocket-server}. This service will accept websocket connections, once a connection has been made it will then send a request to service 1 which is outlined in listing \ref{listing:experiment-2-service-1} every 5 seconds until the connection is closed. Service 1 will send a request to service 2 which is defined in listing \ref{listing:experiment-2-service-2}. Service 2 will respond with a hello message and a number counter which will  increment after every request.
+
+\begin{listing}[H]
+    \caption{Websocket Server}
+    \label{listing:experiment-2-cluster-websocket-server}
+    \begin{minted}{javascript}
+const http = require('http');
+const WebSocket = require('ws');
+const superagent = require('superagent');
+
+const server = http.createServer();
+const wss = new WebSocket.Server({noServer: true});
+
+wss.on('connection', (ws) => {
+    console.log('new connection');
+
+    const interval = setInterval(() => {
+        superagent
+            .get('https://ws-flare-cluster-service-1.cfapps.io/endpoint')
+            .end((err, res) => {
+                ws.send(JSON.stringify(res.body));
+            });
+    }, 5000);
+
+    ws.on('close', () => {
+        clearInterval(interval);
+        console.log('connection dropped');
+    });
+});
+
+server.on('upgrade', function upgrade(request, socket, head) {
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+        wss.emit('connection', ws, request);
+    });
+});
+
+server.listen(process.env.PORT || 3000, () => {
+    console.log('Starting ws server');
+});
+
+\end{minted}
+\end{listing}
+
+\begin{listing}[H]
+    \caption{Service 1}
+    \label{listing:experiment-2-service-1}
+    \begin{minted}{javascript}
+const express = require('express');
+const app = express();
+const superagent = require('superagent');
+const port = process.env.PORT || 3000;
+
+app.get('/endpoint', (_, res) => {
+    superagent
+        .get('https://ws-flare-cluster-service-2.cfapps.io/endpoint')
+        .end((_, response) => {
+            res.json(response.body);
+        });
+});
+
+app.listen(port, () => console.log('listening on port ' + port));
+\end{minted}
+\end{listing}
+
+\begin{listing}[H]
+    \caption{Service 2}
+    \label{listing:experiment-2-service-2}
+    \begin{minted}{javascript}
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+let counter = 0;
+
+app.get('/endpoint', (req, res) => {
+    counter++;
+    res.json({message: 'Hello ' + counter});
+});
+
+app.listen(port, () => console.log('listening on port ' + port));
+\end{minted}
+\end{listing}
+
+\begin{table}[H]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lll}
+\rowcolor[HTML]{ECF4FF} 
+Name             & Instances & Memory Limit Per Instance \\
+websocket-server & 15        & 512MB                     \\
+service 1        & 15        & 256MB                     \\
+service2         & 5         & 256MB                    
+\end{tabular}%
+}
+\caption{Resources allocated to each service}
+\label{table:cf-resource-experiment-2-10000}
+\end{table}
+
+\subsubsection{10000 connections}
+
+In order to reach 10000 concurrent connections we had to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The amount of resources required here are substantial when we compare this this to what the server is doing, this seems massively inflated, however the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The websocket service and service 2 appear to have operated better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-2/10000/conn-10000.png}
+    \caption{Results of simulating 10000 websockets against 3 microservices}
+    \label{fig:experiment-2-conn-10000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-2/10000/ws-cpu-10000.png}
+    \caption{WebSocket Server CPU usage}
+    \label{fig:experiment-2-ws-cpu-10000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-2/10000/service1-cpu-10000.png}
+    \caption{Service 1 CPU usage}
+    \label{fig:experiment-2-service-1-cpu-10000}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-2/10000/service2-cpu-10000.png}
+    \caption{Service 2 CPU usage}
+    \label{fig:experiment-2-service-2-cpu-10000}
+\end{figure}
+
+From these results it is clear that introducing any network related activity between services has a substantial impact on performance of services deployed to Cloud Foundry.
