@@ -1,0 +1,20 @@
+\chapter{Conclusions and Future Work}
+\lhead{\emph{Conclusions and Future Work}}
+
+\section{Discussion}
+
+The purpose of this research project was to design and implement a WebSocket stress test tool that could easily be integrated into continuous integration environments as well as providing automated insights into the underlying microservices of a system under test.
+
+In chapter 4 we presented the results of our experimentation with the ws-flare platform. We tested against a variety of websocket and microservice implementations as well as testing compatibility with a number of third party continuous integration tools. 
+
+The platform itself performed well with most of the experiments, however we were surprised by how little physical websocket connections NodeJS and GoLang could handle while deployed to Cloud Foundry. The maximum that could be achieved was just under 30000 connections. Even scaling those servers to many more instances had no real affect while attempting to go beyond this number. This raises the question, is Cloud Foundry imposing a limit on the number of connections that can be sent to servers deployed on their system. For most websites, 30000 connections would be more than sufficient for their use cases, however for much larger sites such as Google and Facebook, PaaS systems such as Cloud Foundry or Heroku may not be be able to handle the required traffic, which suggests that Cloud Foundry's target audience is small to medium scale business's. We have heard reports that NodeJS and can handle many hundreds of thousands of connections on a single server \cite{nodeConnections}. One such experiment even reached 600 thousand connections on a single Amazon Web Services server \cite{nodeConnections}. The difference here may be that connections to Cloud Foundry are shared between all subscribers to Pivotal Web Services. So you may not get the same throughput as you would in the case of a dedicated server like in the case of Amazon Web Services. 
+
+If we had more time on this project it would have been interesting to compare the connection limits between different systems such as Amazon Web Services, Google Kubernetes Engine and Cloud Foundry. 
+
+\section{Conclusion}
+
+While we were surprised by the low number of connections that could be achieved on Cloud Foundry, we are pleased that the this project achieved its primary goal of creating a WebSocket stress test tool that can integration into Cloud Foundry as well as continuous integration systems. 
+
+This study also makes it clear that performance or stress testing environments is one of the most under utilized forms of testing, due to the complexities involved, especially when it comes to scaling to very large numbers of connections.
+
+Another conclusion that can be drawn from this project is that WebSockets in microservices environments that communicate with multiple services can have a huge impact on CPU and Memory usage as well as affecting the overall stability of the entire system, even for simple examples, such as the experiment conducted in Chapter 4 with multiple services communicating with each other. It is incredibly hard to know how communication between services can affect the overall system without active and continuous stress testing, and we feel that this is a complacency trap that most companies can fall into. This is especially worrying for companies who may be experiencing sudden success, which will attract significant influx of traffic in a very short time frame. 
