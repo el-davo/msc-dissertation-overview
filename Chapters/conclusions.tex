@@ -18,3 +18,13 @@ While we were surprised by the low number of connections that could be achieved 
 This study also makes it clear that performance or stress testing environments is one of the most under utilized forms of testing, due to the complexities involved, especially when it comes to scaling to very large numbers of connections.
 
 Another conclusion that can be drawn from this project is that WebSockets in microservices environments that communicate with multiple services can have a huge impact on CPU and Memory usage as well as affecting the overall stability of the entire system, even for simple examples, such as the experiment conducted in Chapter 4 with multiple services communicating with each other. It is incredibly hard to know how communication between services can affect the overall system without active and continuous stress testing, and we feel that this is a complacency trap that most companies can fall into. This is especially worrying for companies who may be experiencing sudden success, which will attract significant influx of traffic in a very short time frame. 
+
+\section{Future Work}
+
+There is scope for future work on this project. Some of the possibilities are listed below
+
+\begin{itemize}
+  \item Currently the ws-flare platform supports on stress testing of WebSockets. To make this tool more effective going forward it could be expanded to support other protocols such as HTTP, SOAP and AMQP. This would provide an all in one solution to stress testing. 
+  \item Monitoring of microservices could be expanded beyond just Cloud Foundry to include other PaaS systems such as Kubernetes, Heroku or Azure. This would make the tool more widely available for different companies.
+  \item A possible future study that may could come out of this project is testing the difference in connection limits of websockets between shared versus dedicated server instances. And identifying which offering would suit particular types of business's ranging from small, medium to large scale.
+\end{itemize}
