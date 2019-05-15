@@ -1,11 +1,11 @@
 \chapter{Results and Observations}
 \lhead{\emph{Results and Observations}}
 
-In this section the we will present the results of the experiments that we have conducted. For each experiment we will outline how the the experiment was setup, what technologies we are testing and also give an unbiased overview of the data gathered.
+In this section, we will present the results of the experiments that we have conducted. For each experiment, we will outline how the experiment was set up, what technologies we are testing and also give an unbiased overview of the data gathered.
 
 \section{Stress Testing Multiple Language Implementations}
 
-For the first experiment we will be conducting a number of stress tests on three separate programming language WebSocket implementations. The implementation of each WebSocket server will be the vanilla example given from each of the implementations GitHub pages. Each of the experiments in this section will be using the  kubernetes setup as shown in table \ref{table:kubernetes-setup-experminent-1}
+For the first experiment, we will be conducting a number of stress tests on three separate programming language WebSocket implementations. The implementation of each WebSocket server will be the vanilla example given from each of the implementations GitHub pages. Each of the experiments in this section will be using the  Kubernetes setup as shown in table \ref{table:kubernetes-setup-experminent-1}
 
 \begin{table}[H]
 \resizebox{\textwidth}{!}{%
@@ -53,7 +53,7 @@ server.listen(process.env.PORT || 3000);
 \end{minted}
 \end{listing}
 
-The NodeJS server as listed in \ref{table:nodejs-server-experiment-1} code required to handle HTTP upgrades to websocket manually as Cloud Foundry does not automatically handle the HTTP upgrade.
+The NodeJS server as listed in \ref{table:nodejs-server-experiment-1} code required to handle HTTP upgrades to web socket manually as Cloud Foundry does not automatically handle the HTTP upgrade.
 
 The NodeJS WebSocket server is deployed on cloud foundry with the resource limits specified in table \ref{table:cf-resource-limits-1}
 
@@ -110,7 +110,7 @@ The initial test will use the following ws-flare script to simulate 1000 users o
 
 As can be seen from figure \ref{fig:experiment-1-node-conn-summary-1000} simulating 1000 users has a 100\% success rate.
 
-In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment-1-node-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the websockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all connections have been made we then see the CPU return to 0\% usage. 
+In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment-1-node-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the web sockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all, connections have been made we then see the CPU return to 0\% usage. 
 
 \subsubsection{Simulating 5000 Connections}
 
@@ -152,7 +152,7 @@ In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment
     \label{fig:experiment-1-cpu-5000}
 \end{figure}
 
-After increasing the test to simulate 5000 connections we see from figure \ref{fig:experiment-1-conn-summary-5000} that initially the test reached 1710 connections. After this was reached we see a big dip in memory in figure \ref{fig:experiment-1-memory-5000} and CPU in figure \ref{fig:experiment-1-cpu-5000}. The indicates that a 64(MB) limit of memory is not enough to handle this amount of WebSocket connections. One possible solution to this is to add more instances. Through trial and error we found that to reach 5000 users successfully connecting at the same time, one of the following resources are needed on Cloud Foundry
+After increasing the test to simulate 5000 connections we see from figure \ref{fig:experiment-1-conn-summary-5000} that initially the test reached 1710 connections. After this was reached we see a big dip in memory in figure \ref{fig:experiment-1-memory-5000} and CPU in figure \ref{fig:experiment-1-cpu-5000}. The indicates that a 64(MB) limit of memory is not enough to handle this amount of WebSocket connections. One possible solution to this is to add more instances. Through trial and error, we found that to reach 5000 users successfully connecting at the same time, one of the following resources are needed on Cloud Foundry
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -209,11 +209,11 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-1-cpu-5000-1-instances-256-mem}
 \end{figure}
 
-Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} we see that the with 1 instance 87\% memory consumption when connections were being estanblished. However with 4 instances the cpu usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this we recommend using 4 instances instead of 1. 
+Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} we see that the with 1 instance 87\% memory consumption when connections were being established. However, with 4 instances, the CPU usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this, we recommend using 4 instances instead of 1. 
 
 \subsubsection{Simulating 30000 Connections}
 
-For the next experiment we attempted 30000 users connecting at the same time. Using the script in \ref{listing:nodejs-server-experiment-3}
+For the next experiment, we attempted 30000 users connecting at the same time. Using the script in \ref{listing:nodejs-server-experiment-3}
 
 \begin{listing}[H]
     \caption{WS-Flare test script for 5000 users}
@@ -265,7 +265,7 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-3-cpu-5000-1-instances-256-mem}
 \end{figure}
 
-In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} we see that we did not reach the target of 30000 connections within the 60 second limit. Instead we reached 16365 connections. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. On 35 seconds in the CPU was at 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that this a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
+In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} we see that we did not reach the target of 30000 connections within the 60 second limit. Instead, we reached 16365 connections. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. On 35 seconds in the CPU was at 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that this a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however, we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -302,7 +302,7 @@ Instances & Memory Limit Per Instance \\
 
 \subsection{GoLang WebSocket Server}
 
-To test a golang server we wrote a small application using a library called gorilla websocket. The code for this can be seen in listing \ref{listing:golang-server-experiment-1}
+To test a GoLang server we wrote a small application using a library called gorilla web socket. The code for this can be seen in listing \ref{listing:golang-server-experiment-1}
 
 \begin{listing}[H]
     \caption{GoLang Websocket Server Implementation}
@@ -311,11 +311,11 @@ To test a golang server we wrote a small application using a library called gori
 package main
 
 import (
-	"flag"
-	"log"
-	"net/http"
+    "flag"
+    "log"
+    "net/http"
 
-	"github.com/gorilla/websocket"
+    "github.com/gorilla/websocket"
 )
 
 var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
@@ -323,32 +323,32 @@ var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
 var upgrader = websocket.Upgrader{} // use default options
 
 func echo(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			break
-		}
-		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
-	}
+    c, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        log.Print("upgrade:", err)
+        return
+    }
+    defer c.Close()
+    for {
+        mt, message, err := c.ReadMessage()
+        if err != nil {
+            log.Println("read:", err)
+            break
+        }
+        log.Printf("recv: %s", message)
+        err = c.WriteMessage(mt, message)
+        if err != nil {
+            log.Println("write:", err)
+            break
+        }
+    }
 }
 
 func main() {
-	flag.Parse()
-	log.SetFlags(0)
-	http.HandleFunc("/echo", echo)
-	log.Fatal(http.ListenAndServe(*addr, nil))
+    flag.Parse()
+    log.SetFlags(0)
+    http.HandleFunc("/echo", echo)
+    log.Fatal(http.ListenAndServe(*addr, nil))
 }
 \end{minted}
 \end{listing}
@@ -407,11 +407,11 @@ Instances & Memory Limit Per Instance \\
 \label{table:cf-resource-golang-5000}
 \end{table}
 
-For a single instance this remains the same as what we saw for NodeJs in table \ref{table:cf-resource-limits-3}. However for multiple instances we see that we can use one less instance than NodeJs. 
+For a single instance, this remains the same as what we saw for NodeJs in table \ref{table:cf-resource-limits-3}. However, for multiple instances, we see that we can use one less instance than NodeJs. 
 
 \subsubsection{Simulating 30000 connections}
 
-Reaching 30000 connections to a GoLang websocket server could not be achieved. The resources in \ref{table:cf-resource-golang-30000} were used. However, the most that could be achieved was 26000 connections. And a lot of these connections dropped after a few seconds as can be seen in figure \ref{fig:experiment-1-golang-conn-30000-512-10}. NodeJs performed better when simulating 30000 connections. This seems to suggest that GoLang websockets perform better when there are fewer connections however the performance degrades as more connections are added. Figure \ref{fig:experiment-1-golang-cpu-30000-512-10} also suggests that CPU for the golang webserver remains stable no matter how many connections there are.
+Reaching 30000 connections to a GoLang web socket server could not be achieved. The resources in \ref{table:cf-resource-golang-30000} were used. However, the most that could be achieved was 26000 connections. And a lot of these connections dropped after a few seconds as can be seen in figure \ref{fig:experiment-1-golang-conn-30000-512-10}. NodeJs performed better when simulating 30000 connections. This seems to suggest that GoLang web sockets perform better when there are fewer connections however the performance degrades as more connections are added. Figure \ref{fig:experiment-1-golang-cpu-30000-512-10} also suggests that CPU for the GoLang web server remains stable no matter how many connections there are.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -448,7 +448,7 @@ Instances & Memory Limit Per Instance \\
 
 \section{Testing Backend With Multiple Services}
 
-To test the ability to monitor multiple services at the same time using the the ws-flare framework, we created 3 microservices written in NodeJS. The first microservice is a websocket server as shown in listing \ref{listing:experiment-2-cluster-websocket-server}. This service will accept websocket connections, once a connection has been made it will then send a request to service 1 which is outlined in listing \ref{listing:experiment-2-service-1} every 5 seconds until the connection is closed. Service 1 will send a request to service 2 which is defined in listing \ref{listing:experiment-2-service-2}. Service 2 will respond with a hello message and a number counter which will  increment after every request.
+To test the ability to monitor multiple services at the same time using the ws-flare framework, we created 3 microservices written in NodeJS. The first microservice is a web socket server as shown in listing \ref{listing:experiment-2-cluster-websocket-server}. This service will accept web socket connections, once a connection has been made it will then send a request to service 1 which is outlined in listing \ref{listing:experiment-2-service-1} every 5 seconds until the connection is closed. Service 1 will send a request to service 2 which is defined in listing \ref{listing:experiment-2-service-2}. Service 2 will respond with a hello message and a number counter which will increment after every request.
 
 \begin{listing}[H]
     \caption{Websocket Server}
@@ -547,7 +547,7 @@ service2         & 5         & 256MB
 
 \subsubsection{10000 connections}
 
-In order to reach 10000 concurrent connections we had to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The amount of resources required here are substantial when we compare this this to what the server is doing, this seems massively inflated, however the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The websocket service and service 2 appear to have operated better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
+In order to reach 10000 concurrent connections we had to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The number of resources required here are substantial when we compare this to what the server is doing, this seems massively inflated, however, the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The web socket service and service 2 appear to have operated better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
 
 \begin{figure}[H]
   \centering
@@ -577,11 +577,11 @@ In order to reach 10000 concurrent connections we had to use the resources defin
     \label{fig:experiment-2-service-2-cpu-10000}
 \end{figure}
 
-From these results it is clear that introducing any network related activity between services has a substantial impact on performance of services deployed to Cloud Foundry.
+From these results, it is clear that introducing any network related activity between services has a substantial impact on the performance of services deployed to Cloud Foundry.
 
 \section{Usage in Continuous Integration}
 
-With the ever growing shift from manual testing to automated testing there are a large number of tools available which can automating tasks seamless. TravisCI \cite{travisCI}, AppveyorCI \cite{appveyorCI} and Jenkins \cite{jenkinsCi} are some of the more popular tools available in this area. We wanted to test the integration between the ws-flare platform and continuous integration tools in order to demonstrate that this new platform can easily integrate with other tools. We created a command line tool that could integrate to the ws-flare platform. The command line tool is named ws-flare-cli. The tool is distributed as an NPM package and can be installed on any system that is running NodeJS. To install the package the command in listing \ref{listing:ws-flare-cli-install} can be used. This makes the cli tool available to use in a command prompt.
+With the ever growing shift from manual testing to automated testing there are a large number of tools available which can automate tasks seamless. TravisCI \cite{travisCI}, AppveyorCI \cite{appveyorCI} and Jenkins \cite{jenkinsCi} are some of the more popular tools available in this area. We wanted to test the integration between the ws-flare platform and continuous integration tools in order to demonstrate that this new platform can easily integrate with other tools. We created a command line tool that could integrate with the ws-flare platform. The command line tool is named ws-flare-cli. The tool is distributed as an NPM package and can be installed on any system that is running NodeJS. To install the package the command in listing \ref{listing:ws-flare-cli-install} can be used. This makes the CLI tool available to use in a command prompt.
 
 \begin{listing}[H]
     \caption{Command to install the ws-flare-cli package}
@@ -591,7 +591,7 @@ npm install -g ws-flare-cli
 \end{minted}
 \end{listing}
 
-The tool takes 2 parameters as demonstrated in listing \ref{listing:ws-flare-cli-parameters-example}. The first parameters is the URL to where the ws-flare platform is located. The second parameter is the generated token needed to gain access to to the graphql interface. This token is encrypted with JWT (JSON Web Token) for security reasons. If the wrong token is provided then the ws-flare platform will reject the request to start a task.
+The tool takes 2 parameters as demonstrated in listing \ref{listing:ws-flare-cli-parameters-example}. The first parameters is the URL to where the ws-flare platform is located. The second parameter is the generated token needed to gain access to to the GraphQL interface. This token is encrypted with JWT (JSON Web Token) for security reasons. If the wrong token is provided then the ws-flare platform will reject the request to start a task.
 
 \begin{listing}[H]
     \caption{Command to run a task on the ws-flare platform}
@@ -601,7 +601,7 @@ ws-flare-cli --server=<WS-FLARE-SERVER-LOCATION> --token=<TASK-TOKEN>
 \end{minted}
 \end{listing}
 
-To demonstrate that the ws-flare-cli tool can be easily integrated into multiple continuous integration tools, we created 2 experiments. The first uses TravisCI and the second uses AppveyorCI. TravisCI reads commands from a file called ``.travis.yml``. The file contents are shown in listing \ref{listing:ws-flare-cli-travis-yaml}
+To demonstrate that the ws-flare-cli tool can be easily integrated into multiple continuous integration tools, we created 2 experiments. The first uses TravisCI and the second uses AppveyorCI. Travis reads commands from a file called ``.travis.yml``. The file contents are shown in listing \ref{listing:ws-flare-cli-travis-yaml}
 
 \begin{listing}[H]
     \caption{Travis YAML file for running ws-flare-cli commands}
@@ -631,9 +631,9 @@ script:
     \label{fig:experiment-3-travis-log}
 \end{figure}
 
-As can be seen in figure \ref{fig:experiment-3-travis-log}, the command line tool was installed and then the tool communicated with the ws-flare platform at the specified address and ran a test against a websocket server. The result in this case was the build passed. If however the test failed it would fail the travis build. 
+As can be seen in figure \ref{fig:experiment-3-travis-log}, the command line tool was installed and then the tool communicated with the ws-flare platform at the specified address and ran a test against a web socket server. The result, in this case, was the build passed. If however, the test failed it would fail the Travis build. 
 
-Similar to travis Appveyor uses a yaml file called ``appveyor.yml``. The contents of this file can be seen in listing \ref{listing:ws-flare-cli-appveyor-yaml}
+Similar to Travis Appveyor uses a YAML file called ``appveyor.yml``. The contents of this file can be seen in listing \ref{listing:ws-flare-cli-appveyor-yaml}
 
 \begin{listing}[H]
     \caption{AppveyorCI YAML file for running ws-flare-cli commands}
@@ -661,7 +661,7 @@ build: off
 \end{minted}
 \end{listing}
 
-The corresponding output from running against appveyor can be seen in listing \ref{fig:experiment-3-appveyor-log}. In this experiment the test passed again, however it failed it would also fail the build as demonstrated in figure \ref{fig:experiment-3-appveyor-log-failed}. Failing the build is as important as passing the build. If the build fails it will prevent code from being merged that could impact performance of the system.
+The corresponding output from running against Appveyor can be seen in listing \ref{fig:experiment-3-appveyor-log}. In this experiment, the test passed again, however it failed it would also fail the build as demonstrated in figure \ref{fig:experiment-3-appveyor-log-failed}. Failing the build is as important as passing the build. If the build fails it will prevent the code from being merged that could impact the performance of the system.
 
 \begin{figure}[H]
   \centering

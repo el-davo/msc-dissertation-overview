@@ -1,14 +1,14 @@
 \chapter{Solution Design and Implementation}
 
-This chapter describes the architecture that was designed for this project. In the first part of this chapter we will discuss each of the individual parts of the overall functioning stress test platform .In the later stages of this chapter we will present some of the more relevant code snippets that make up the system and discuss how test driven development helped us achieve the goal of creating this platform. Throughout this chapter you will see the term ws-flare used, this is because We have given the platform the name ws-flare which is short for WebSocket flare.
+This chapter describes the architecture that was designed for this project. In the first part of this chapter, we will discuss each of the individual parts of the overall functioning stress test platform.In the later stages of this chapter, we will present some of the more relevant code snippets that make up the system and discuss how test-driven development helped us achieve the goal of creating this platform. Throughout this chapter you will see the term ws-flare used, this is because We have given the platform the name ws-flare which is short for WebSocket flare.
 
 \section{Problem Definition}
 
-This project aims to develop a tool for stress testing application which can easily integrate into continuous integration environments. The tool that we have created can abstract away the complexities of stress testing, such as automatically scaling using kubernetes, as well as automatic monitoring of applications in a microservice environment, ensuring that developers have better insights into how their applications handle an abundance of users. Throughout this chapter we will present the main technologies that we used while developing this tool.
+This project aims to develop a tool for stress testing application which can easily integrate into continuous integration environments. The tool that we have created abstracts away the complexities of stress testing, such as automatically scaling using Kubernetes, as well as automatic monitoring of applications in a microservice environment, ensuring that developers have better insights into how their applications handle an abundance of users. Throughout this chapter, we will present the main technologies that we used while developing this tool.
 
 \section{Technologies}
 
-For this project we have utilized the following technologies extensively.
+For this project, we have utilized the following technologies extensively.
 
 \begin{itemize}
   \item NodeJS (Loopback 4)
@@ -23,29 +23,29 @@ For this project we have utilized the following technologies extensively.
 
 \subsection{NodeJS (Loopback 4)}
 
-NodeJS was chosen for this project because of our own particular expertise with NodeJS. We were also concerned with using high memory consumption languages such as Java in this project as we would be running this application on a kubernetes cluster. The main financial costs when it comes to kubernetes or any cloud offering is memory and cpu usage. The more reources that are in use, the more the cost of running the platform will be. NodeJS on the other hand is much more lightweight. We found that 30 Megabytes of memory is more than enough to run a single microservice in this platform. 
+NodeJS was chosen for this project because of our own particular expertise with NodeJS. We were also concerned with using high memory consumption languages such as Java in this project as we would be running this application on a Kubernetes cluster. The main financial costs when it comes to Kubernetes or any cloud offering is memory and CPU usage. The more resources that are in use, the more the cost of running the platform will be. NodeJS, on the other hand, is much more lightweight. We found that 30 Megabytes of memory is more than enough to run a single microservice in this platform. 
 
-We are also using a web framework called Loopback 4. This framework is written in typescript and has in built support for test driven development.
+We are also using a web framework called Loopback 4. This framework is written in typescript and has inbuilt support for test-driven development.
 
 \subsection{Angular}
 
-Angular is a popular open source, single page application framework developed and maintained by Google. We use this framework extensively for building the user interface of the ws-flare framework. Angular is written in typescript and comes with a powerful testing framework called TestBed which makes developing in a test driven manner simpler.
+Angular is a popular open source, single page application framework developed and maintained by Google. We use this framework extensively for building the user interface of the ws-flare framework. Angular is written in typescript and comes with a powerful testing framework called TestBed which makes developing in a test-driven manner simpler.
 
 \subsection{Highcharts}
 
-In the ws-flare user interface we display many graphs for showing the results of test jobs. Highcharts is a charting library, developed by HighSoft. It is free to use for open source applications, and supports an abundance of graph types.
+In the ws-flare user interface, we display many graphs for showing the results of test jobs. Highcharts is a charting library, developed by HighSoft. It is free to use for open source applications and supports an abundance of graph types.
 
 \subsection{Docker}
 
-Each service in the ws-flare framework is built to run in a docker container. This is necessary as the framework is built to run on a kubernetes cluster which needs docker in order to function. Each service is also deployed to docker hub, which makes it easy for any company to import the framework into their environments.
+Each service in the ws-flare framework is built to run in a docker container. This is necessary as the framework is built to run on a Kubernetes cluster which needs docker in order to function. Each service is also deployed to Docker hub, which makes it easy for any company to import the framework into their environments.
 
 \subsection{Kubernetes}
 
-The ws-flare framework is built exclusively to run on kubernetes clusters. This helps with scalability issues when simulating many thousands of connections as kubernetes can run over many machines simultaneously. We also use kubernetes package manager called helm. With helm we can easily distribute the framework and companies can install it into their own infrastructure.
+The ws-flare framework is built exclusively to run on Kubernetes clusters. This helps with scalability issues when simulating many thousands of connections as Kubernetes can run over many machines simultaneously. We also use Kubernetes package manager called helm. With helm we can easily distribute the framework and companies can install it into their own infrastructure.
 
 \subsection{MySql}
 
-We use MySql as the main data persistence database within the ws-flare framework. Data includes websocket metadata such as successful, failed and dropped connections as well as data gathered during monitoring of cloud foundry services. We run MySQL in high availability mode. For this we have two instances of MySql running at the same time. One instance is for reads and the other instance is for writes. The reason for this is there are a lot of writes occurring during test runs. For example, while simulating 30000 connections, it is necessary to persist data for each connection in a short timeframe. While this is happening, users need to use the user interface to view test runs in real time. When users view the interface they are mostly reading information from the database. High availability prevents any latency when viewing the user interface.
+We use MySql as the main data persistence database within the ws-flare framework. Data includes web socket metadata such as successful, failed and dropped connections as well as data gathered during monitoring of cloud foundry services. We run MySQL in high availability mode. For this, we have two instances of MySql running at the same time. One instance is for reads and the other instance is for writes. The reason for this is there are a lot of writes occurring during test runs. For example, while simulating 30000 connections, it is necessary to persist data for each connection in a short timeframe. While this is happening, users need to use the user interface to view test runs in real time. When users view the interface they are mostly reading information from the database. High availability prevents any latency when viewing the user interface.
 
 \subsection{RabbitMQ}
 
@@ -53,7 +53,7 @@ Ws-flare is built using a distributed microservices architecture. Some services 
 
 \subsection{GraphQL}
 
-GraphQL is a new technology developed by FaceBook. It is built as an alternative to REST and is suited to largely decoupled microservices. In the ws-flare user interface we need to query a lot of information to display results to a developer. With REST it would be necessary to send a request to each of the relevant service on the backend and agregate the results on the user interface. With GraphQL however the user interface needs to send a query to one single service, and that service will aggregate the data coming from the other services. This makes working with many microservices much easier.
+GraphQL is a new technology developed by FaceBook. It is built as an alternative to REST and is suited to largely decoupled microservices. In the ws-flare user interface, we query a lot of information to display results to a developer. With REST it would be necessary to send a request to each of the relevant services on the backend and aggregate the results on the user interface. With GraphQL however the user interface needs to send a query to one single service, and that service will aggregate the data coming from the other services. This makes working with many microservices much easier.
 
 \section{Architecture}
 
@@ -61,7 +61,7 @@ There are a few terms going forward that need to be defined. Below is an explana
 
 \begin{itemize}
   \item \emph{Pod} Is a group of one or more docker containers with shared storage and network running within Kubernetes.
-  \item \emph{JWT} stand for JSON Web Token is an open standard \href{https://tools.ietf.org/html/rfc7519}{RFC 7519} for securely transmitting data between 2 places in JSON format. For the purposes of this project we will be using it for user authentication.
+  \item \emph{JWT} stands for JSON Web Token is an open standard \href{https://tools.ietf.org/html/rfc7519}{RFC 7519} for securely transmitting data between 2 places in JSON format. For the purposes of this project, we will be using it for user authentication.
 \end{itemize}
 
 \begin{figure}[!h]
@@ -71,7 +71,7 @@ There are a few terms going forward that need to be defined. Below is an explana
     \label{fig:https-handshake}
 \end{figure}
 
-The project has been split up into a number of microservices to allow for maximum code readability and test-ability. The following microservices have been developed to make up the system.
+The project has been split up into a number of microservices to allow for maximum code readability and testability. The following microservices have been developed to make up the system.
 
 \begin{itemize}
   \item ws-flare-ui
@@ -93,11 +93,11 @@ This service is written in Angula7. It holds all the code for displaying the use
 
 \subsection{ws-flare-user-api}
 
-Holds all user authentication information, such as email, user-name and passwords. For making authentication requests we are using JWT tokens to allow a user to query the system. Without this security any user could utilize the system to attack websites so it is important that we have this layer of security.
+Holds all user authentication information, such as email, user-name, and passwords. For making authentication requests we are using JWT tokens to allow a user to query the system. Without this security, any user could utilize the system to attack websites so it is important that we have this layer of security.
 
 \subsection{ws-flare-projects-api}
 
-The system allows users to create projects to logically separate each task. This is more for user convenience and adds to the overall UX aesthetics's of the system. All project and task information is stored within this service. 
+The system allows users to create projects to logically separate each task. This is more for user convenience and adds to the overall UX aesthetics's of the system. All project and task information are stored within this service. 
 
 \subsection{ws-flare-jobs-api}
 
@@ -105,7 +105,7 @@ This service holds information about currently running jobs. The system allows f
 
 \subsection{ws-flare-orchestation-api}
 
-This service handles the orchestration of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested websocket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications.
+This service handles the orchestration of jobs. It is listening on a rabbitMQ message queue for requests to start new jobs. Once it has received a new request it will calculate how many docker containers it needs to spin up to achieve the requested web socket load. It will then instruct Kubernetes to start the required amount of pods that it needs to start the stress test. It will also instruct Kubernetes to start a pod designed specifically for monitoring Cloud Foundry applications. Once all pods have been started, this service will instruct all pods to start the test and for the Cloud Foundry monitor to start monitoring the specified applications.
 
 \subsection{ws-flare-cloud-foundry-monitor-api}
 
@@ -113,11 +113,11 @@ This service stores information related to running applications on Cloud Foundry
 
 \subsection{ws-flare-test-client}
 
-This is an application that can be spun up as a Kubernetes pod. The goal of this application is to simulate a number of websocket connections. A limit of 1000 connections per pod has been specified. For example if we have a test that requires a simulation of 5046 users then 6 ws-flare-test-client pods will be created. Five of those will simulate 1000 connections and the sixth will simulate 46 connections. Together they will simulate the full 5046 connections. For each of the connections established the connection information will be stored within the ws-flare-jobs-api service. The service will contain information on how many connections were successfully established, how many connections have dropped, and how many connections have not connected. We will also store the amount of time or latency it tool to connect to the websocket server. Once the stress test has completed this application will instruct Kubernetes to delete itself. Kubernetes will then proceed to remove the pod.
+This is an application that can be spun up as a Kubernetes pod. The goal of this application is to simulate a number of web socket connections. A limit of 1000 connections per pod has been specified. For example, if we have a test that requires a simulation of 5046 users then 6 ws-flare-test-client pods will be created. Five of those will simulate 1000 connections and the sixth will simulate 46 connections. Together they will simulate the full 5046 connections. For each of the connections established the connection information will be stored within the ws-flare-jobs-api service. The service will contain information on how many connections were successfully established, how many connections have dropped, and how many connections have not connected. We will also store the amount of time or latency it tool to connect to the web socket server. Once the stress test has completed this application will instruct Kubernetes to delete itself. Kubernetes will then proceed to remove the pod.
 
 \subsection{ws-flare-cloudfoundry-monitor-client}
 
-This is another application that is spun up as a Kubernetes pod. Once it is created it will immediately attempt to connect to the specified Cloud Foundry instance. There it will attempt to find the applications that the user requested to monitor. Once the correct applications have been found this application will send a message back to ws-flare-orchestation-api over a rabbitMQ message queue informing it that it has found the correct applications and is ready to start monitoring. The application will then wait for the orchestration API to create the necessary clients to simulate the Websockets. While the test is in progress the application will actively communicate with the Cloud Foundry instance to interrogate it for applications statistics such as memory and CPU usage. It will also get information from each instance of the application deployed on cloud foundry. Once all tests have completed this application will then shut itself down by instructing kubernetes to kill itself. Kubernetes will then remove the pod.
+This is another application that is spun up as a Kubernetes pod. Once it is created it will immediately attempt to connect to the specified Cloud Foundry instance. There it will attempt to find the applications that the user requested to monitor. Once the correct applications have been found this application will send a message back to ws-flare-orchestation-api over a rabbitMQ message queue informing it that it has found the correct applications and is ready to start monitoring. The application will then wait for the orchestration API to create the necessary clients to simulate the Websockets. While the test is in progress the application will actively communicate with the Cloud Foundry instance to interrogate it for applications statistics such as memory and CPU usage. It will also get information from each instance of the application deployed on cloud foundry. Once all tests have completed this application will then shut itself down by instructing Kubernetes to kill itself. Kubernetes will then remove the pod.
 
 \subsection{ws-flare-graphql}
 
@@ -125,14 +125,14 @@ We chose to integrate GraphQL into this architecture due to its ability to easil
 
 \subsection{ws-flare-gateway}
 
-This is the API gateway to allow the user interface to communicate with the system. Using an API gateway provides a number of benefits, as everything is served through one endpoint or ip address. Currently the gateway has routes only the GraphQL server and the user interface server. The routes are outlined below
+This is the API gateway to allow the user interface to communicate with the system. Using an API gateway provides a number of benefits, as everything is served through one endpoint or IP address. Currently, the gateway has routes only the GraphQL server and the user interface server. The routes are outlined below
 
 \begin{itemize}
   \item / routes to ws-flare-ui
   \item /graphql routes to ws-flare-graphql
 \end{itemize}
 
-The API gateway also provides a layer of security as the only way a user can interact with the system is through those 2 routes. It cannot communicate with any of the underlying services. The underlying technology of this gateway is an nginx server.
+The API gateway also provides a layer of security as the only way a user can interact with the system is through those 2 routes. It cannot communicate with any of the underlying services. The underlying technology of this gateway is an Nginx server.
 
 \subsection{ws-flare-helm-chart}
 
@@ -146,7 +146,7 @@ Kubernetes will then work out all the routing between services using its interna
 
 \subsection{Utilizing Kubernetes API to test at scale}
 
-Stress testing as the name suggests puts a lot of stress on resources. Not only is this true for the system that is being tested, it is also true for the system performing the test. To eliminate resource drain on the system that is performing the test we need to be easily able to scale the test out for maximum throughput. Using a simple NodeJS script on a 16GB Memory intel core I7 labtop the maximum websockets that could be tested was peaking at around 10000 simultaneous websockets. After this amount it was observed that connections would either drop randomly or not connect at all to a websocket server. 
+Stress testing as the name suggests puts a lot of stress on resources. Not only is this true for the system that is being tested, it is also true for the system performing the test. To eliminate resource drain on the system that is performing the test we need to be easily able to scale the test out for maximum throughput. Using a simple NodeJS script on a 16GB Memory Intel core I7 laptop the maximum web sockets that could be tested was peaking at around 10000 simultaneous web sockets. After this amount, it was observed that connections would either drop randomly or not connect at all to a web socket server. 
 
 \begin{minted}{javascript}
 var WebSocket = require('ws');
@@ -165,7 +165,7 @@ for (let i = 0; i < 100000; i++) {
 }
 \end{minted}
 
-To maximize the number of websockets we can simulate we need a scalable system. This is the reason why Kubernetes was chosen for this project. With Kubernetes we can easily create new pods to perform the simulations. Kubernetes has a powerful rest API which we can perform a POST request on, passing it the required information it needs to create a new pod. The request looks like the example below.
+To maximize the number of web sockets we can simulate we need a scalable system. This is the reason why Kubernetes was chosen for this project. With Kubernetes we can easily create new pods to perform the simulations. Kubernetes has a powerful rest API which we can perform a POST request on, passing it the required information it needs to create a new pod. The request looks like the example below.
 
 \begin{minted}{typescript}
 kubernetesClient
@@ -202,13 +202,13 @@ kubernetesClient
   
 \end{minted}
 
-The above script will request that Kubernetes create a new Pod using the ws-flare-test-client docker container. We can also pass environment variables to this Pod. Using this API we can also specify how much CPU this pod is assigned. The above expression of 100m means that this pod will have one hundred millicpu. So if 1000m is the equivalent of one CPU then we can say that this Pod will be assigned one tenth of the avilable CPU cycles. From testing the application this is a good enough amount of CPU cycles to simulate 1000 websockets. 
+The above script will request that Kubernetes create a new Pod using the ws-flare-test-client docker container. We can also pass environment variables to this Pod. Using this API we can also specify how much CPU this pod is assigned. The above expression of 100m means that this pod will have one hundred millicpu. So if 1000m is the equivalent of one CPU then we can say that this Pod will be assigned one-tenth of the available CPU cycles. From testing the application this is a good enough amount of CPU cycles to simulate 1000 web sockets. 
 
-If we consider that making the above request to Kubernetes will yield us one Pod which can simulate 1000 websockets, we can now start to think that if we make 10 requests and are given ten Pods, we can now simulate 10,000 websockets.
+If we consider that making the above request to Kubernetes will yield us one Pod which can simulate 1000 web sockets, we can now start to think that if we make 10 requests and are given ten Pods, we can now simulate 10,000 web sockets.
 
-There are a number of options for obtaining a kubernetes cluster. Kubernetes can be deployed on an AWS Compute cluster using Amazons web-tools. Pivotal also has its own flavour of Kubernetes in the form of Pivotals Container Service (PKS). However in practive and while working on this project it was found that Google Kubernetes Engine (GKE) was one of the easiest kubernetes clusters to setup. It should also be noted that all of the above are paid services, and can become expensive depending on how much resources are assigned to a cluster. 
+There are a number of options for obtaining a Kubernetes cluster. Kubernetes can be deployed on an AWS Compute cluster using Amazons web-tools. Pivotal also has its own flavor of Kubernetes in the form of Pivotal Container Service (PKS). However, in practice and while working on this project it was found that Google Kubernetes Engine (GKE) was one of the easiest Kubernetes clusters to set up. It should also be noted that all of the above are paid services, and can become expensive depending on how much resources are assigned to a cluster. 
 
-To setup a new cluster on GKE here are a few guidelines. The following assumes that you already have setup a GKE account setup.
+To set up a new cluster on GKE here are a few guidelines. The following assumes that you already have set up a GKE account setup.
 
 \begin{figure}[!h]
   \centering
@@ -219,7 +219,7 @@ To setup a new cluster on GKE here are a few guidelines. The following assumes t
 
 \FloatBarrier
 
-This will bring you into the kubernetes engine screen where you can then create your own cluster from scratch.
+This will bring you into the Kubernetes engine screen where you can then create your own cluster from scratch.
 
 \begin{figure}[!h]
   \centering
@@ -230,7 +230,7 @@ This will bring you into the kubernetes engine screen where you can then create 
 
 \FloatBarrier
 
-Once you have selected your desired cluster resources, click Create and in a few minutes your cluster should be created. Once the cluster is setup you will be given the opportunity to connect to it. 
+Once you have selected your desired cluster resources, click Create and in a few minutes, your cluster should be created. Once the cluster is the setup you will be given the opportunity to connect to it. 
 
 \begin{figure}[!h]
   \centering
@@ -246,7 +246,7 @@ After clicking connect you will be given a command that you can run on your mach
 
 \subsection{Providing a scripting interface}
 
-To ensure that it is possible to test a websocket server in a number of scenarios, the ws-flare platform allows users to essentially script how they want the test to progress. This enables the user to simulate a lot more scenarios then just simulating a number of connections at a time. When users create a new task with the platform they will be offered the opportunity to add a script. The script itself is a JSON array. An example of a valid script is below.
+To ensure that it is possible to test a web socket server in a number of scenarios, the ws-flare platform allows users to essentially script how they want the test to progress. This enables the user to simulate a lot more scenarios than just simulating a number of connections at a time. When users create a new task with the platform they will be offered the opportunity to add a script. The script itself is a JSON array. An example of a valid script is below.
 
 \begin{minted}{JSON}
 [
@@ -271,9 +271,9 @@ To ensure that it is possible to test a websocket server in a number of scenario
 ]
 \end{minted}
 
-In this scenario, we will initially be simulating 10000 connection o a websocket server. After 55 seconds, those 10000 connection will disconnect and one minute into the test another 5000 connection will attempt to connect to the server and disconnect after 30 seconds. Finally 2 minutes into the test 15000 connection will be simulated for one minute. Scripting is a very powerful feature of the stress testing platform. 
+In this scenario, we will initially be simulating 10000 connection o a web socket server. After 55 seconds, those 10000 connections will disconnect and one minute into the test another 5000 connection will attempt to connect to the server and disconnect after 30 seconds. Finally, 2 minutes into the test 15000 connection will be simulated for one minute. Scripting is a very powerful feature of the stress testing platform. 
 
-One scenario we hope to detect with scripting is the ability for a websocket server to actively clean up after itself when users disconnect. One scenario we found recently where this would have been applicable is having a websocket server backed by a Redis database. The role of the websocket server was to send notifications. Whenever a new websocket connected to the server the websocket server would create a new connection to the Redis database to wait for notifications. We noticed ever hour or so the application would crash and restart automatically. After some investigation it was found that the Redis connections were never dropped when a user disconnected their websocket. Over time the websocket server would simply be starved of memory and crash. With this scripting ability we can actively test for this kind of scenario, among many other scenarios.
+One scenario we hope to detect with scripting is the ability for a web socket server to actively clean up after itself when users disconnect. One scenario we found recently where this would have been applicable is having a web socket server backed by a Redis database. The role of the web socket server was to send notifications. Whenever a new web socket connected to the server the web socket server would create a new connection to the Redis database to wait for notifications. We noticed every hour the application would crash and restart automatically. After some investigation, it was found that the Redis connections were never dropped when a user disconnected their web socket. Over time the web socket server would simply be starved of memory and crash. With this scripting ability, we can actively test for this kind of scenario, among many other scenarios.
 
 \subsection{Pivotal Cloud Foundry Monitoring}
 
@@ -300,7 +300,7 @@ async login(authorization_endpoint: string): Promise<Token> {
 }
 \end{minted}
 
-Using this code we can get an access token that can be used to query the endpoints we need. A few important points, we need to set Basic Y2Y6 as an Authorization header and the correct Content-Type. It is also necessary to specify the grant\_type which in this case is password. Cloud Foundry offers a number of grant types such as password and oauth. 
+Using this code we can get an access token that can be used to query the endpoints we need. A few important points, we need to set Basic Y2Y6 as an Authorization header and the correct Content-Type. It is also necessary to specify the grant\_type which in this case is password. Cloud Foundry offers a number of grant types such as password and Oauth. 
 
 Cloud Foundry is split up into 3 logical entities. These are
 
@@ -310,11 +310,11 @@ Cloud Foundry is split up into 3 logical entities. These are
   \item Applications
 \end{itemize}
 
-Organizations represent a department in a company. The organization is the entity that is billed for the resources used on Cloud Foundry. On PWS (Pivotal Web Services) which is Pivotals cloud offering of Cloud Foundry this is measured in both CPU usage and Memory usage over a period of a month.
+Organizations represent a department in a company. The organization is the entity that is billed for the resources used on Cloud Foundry. On PWS (Pivotal Web Services) which is Pivotal's cloud offering of Cloud Foundry this is measured in both CPU usage and Memory usage over a period of a month.
 
-Spaces represent different environments. Spaces make environment repeat-ability very simple. For example you could have a DEV, STAGING and PROD environment all with the same applications deployed and utilizing the same resources, however they are used for very different things. The DEV environment can be used by developers for testing code changes. The STAGING environment can be used by a quality assurance team to test any new features before reaching the PROD environment. the PROD environment is the last stop and this is the environment that the end user will be connecting to.
+Spaces represent different environments. Spaces make environment repeat-ability very simple. For example you could have a DEV, STAGING and PROD environment all with the same applications deployed and utilizing the same resources, however, they are used for very different things. The DEV environment can be used by developers for testing code changes. The STAGING environment can be used by a quality assurance team to test any new features before reaching the PROD environment. the PROD environment is the last stop and this is the environment that the end user will be connecting to.
 
-Just like there can be multiple spaces in an organization, there can also be multiple applications deployed in a space. The applications themselves are the applications that a developer write. Applications on Cloud Foundry run in droplets, which are a kin to docker containers. Droplets require a user to specify a buildpack. Buildpacks are runtime environments for an application. Cloud Foundry supports many buildpacks for many different languages such as Java and NodeJS. To deploy an application to cloud foundry a user only needs to have an account and a manifest.yml file in the root of their project. A typical manifest file for a JAVA project might look like.
+Just like there can be multiple spaces in an organization, there can also be multiple applications deployed in space. The applications themselves are the applications that a developer write. Applications on Cloud Foundry run in droplets, which are akin to Docker containers. Droplets require a user to specify a buildpack. Buildpacks are runtime environments for an application. Cloud Foundry supports many buildpacks for many different languages such as Java and NodeJS. To deploy an application to cloud foundry a user only needs to have an account and a manifest.yml file in the root of their project. A typical manifest file for a JAVA project might look like.
 
 \begin{minted}{YAML}
 name: cardsec
@@ -337,7 +337,7 @@ var response = json('https://api.run.pivotal.io/v2/organizations', {
 });
 \end{minted}
 
-This will yield a list of organization running in Cloud Foundry that the user has access to. Each organization also has a unique GUID. Once we find the correct GUID we can then use this to search for the correct space by using the code below.
+This will yield a list of organizations running in Cloud Foundry that the user has access to. Each organization also has a unique GUID. Once we find the correct GUID we can then use this to search for the correct space by using the code below.
 
 \begin{minted}[breaklines]{typescript}
 var response = json('https://api.run.pivotal.io/v2/organizations/' + orgId + '/spaces', {
@@ -358,7 +358,7 @@ var response =  json('https://api.run.pivotal.io/v2/spaces/' + spaceId +'/apps',
 });
 \end{minted}
 
-Once the correct apps are found the last step is to use the obtained app guids to get application statistics such as CPU and Memory usage. It is also possible to query the state of the application. There are 3 application states possible, these are, RUNNING, STOPPED and CRASHED. To get the infomormation about a running application the code below is used. 
+Once the correct apps are found the last step is to use the obtained app GUID to get application statistics such as CPU and Memory usage. It is also possible to query the state of the application. There are 3 application states possible, these are, RUNNING, STOPPED and CRASHED. To get the information about a running application the code below is used. 
 
 \begin{minted}[breaklines]{typescript}
 json('https://api.run.pivotal.io/v2/apps/' + appId + '/stats', {
@@ -399,9 +399,9 @@ An example of a response from this endpoint is detailed below
 
 As can be seen in the response, there are some very useful metrics here. The cloud foundry monitor client will continue to poll this endpoint for the duration of the stress test. Polling will take place every second. All results from a successful request are stored in a MySQL database for displaying the results over a period of time.
 
-\section{Stress testing the websocket server}
+\section{Stress testing the web socket server}
 
-For connecting to a live websocket server we have chosen to utilize a popular NodeJS client called \href{https://www.npmjs.com/package/ws}{ws}. This is an intuitive client that has many useful features and hooks. For the purposes of this project we will be monitoring certain metrics of a live websocket server. We will be monitoring the following metrics.
+For connecting to a live web socket server we have chosen to utilize a popular NodeJS client called \href{https://www.npmjs.com/package/ws}{ws}. This is an intuitive client that has many useful features and hooks. For the purposes of this project, we will be monitoring certain metrics of a live web socket server. We will be monitoring the following metrics.
 
 \begin{itemize}
   \item Successful connection over a period of time
@@ -428,13 +428,13 @@ Test Driven Development was used extensively throughout this project. The follow
 \begin{itemize}
   \item Yarn package manager for NodeJS 
   \item Mocha testing framework for NodeJS
-  \item Docker for simulating MYsql and RabbitMQ
+  \item Docker for simulating MySQL and RabbitMQ
   \item CypressJS for end to end testing the user interface
   \item Jest for unit testing the user interface
   \item nyc for measuring typescript code coverage
 \end{itemize}
 
-For packaging each service into a docker container we made use of \href{https://travis-ci.org/}{travis-ci} as an a countinuous integration pipeline. This tool is popular in the open source community and integrates well with GitHub which is the source code repository used for this project. When changes are made to any of the services travis-ci will automatically detect the changes and begin a build. Travis will detect if you have a .travis-ci.yaml configuration file on the root of your project. An example of a travis configuration file is outlined below.
+For packaging each service into a docker container we made use of \href{https://travis-ci.org/}{travis-ci} as a continuous integration pipeline. This tool is popular in the open source community and integrates well with GitHub which is the source code repository used for this project. When changes are made to any of the services Travis-ci will automatically detect the changes and begin a build. Travis will detect if you have a .travis-ci.yaml configuration file on the root of your project. An example of a Travis configuration file is outlined below.
 
 \begin{minted}[breaklines]{yaml}
 language: node_js
@@ -458,6 +458,6 @@ deploy:
       branch: master
 \end{minted}
 
-The build goes through a number of steps. First it will install all dependencies of the service using yarn package manager. Next it will run all tests, failing the build if any test fails. Next it will run a docker build which attempts to put our application into a docker container. Once this completes successfully travis will release the docker container to docker hub which is an public registry for docker containers. From there the docker container can be pulled into any project which is using docker or Kubernetes.
+The build goes through a number of steps. First, it will install all dependencies of the service using Yarn package manager. Next, it will run all tests, failing the build if any test fails. Next, it will run a docker build which attempts to put our application into a docker container. Once this completes successfully Travis will release the docker container to docker hub which is a public registry for Docker containers. From there the docker container can be pulled into any project which is using docker or Kubernetes.
 
-For monitoring code coverage this project uses a cloud offering called \href{https://coveralls.io/}{coveralls}. This integrates with travis-ci. Code overage metrics are gathered during builds and sent to coveralls for analysis. Coveralls then summarises the code coverage for the project gives and overall code coverage metric ranging from 0 to 100\%. Coveralls is free to use with open source projects.
+For monitoring code coverage this project uses a cloud offering called \href{https://coveralls.io/}{coveralls}. This integrates with Travis-ci. Code overage metrics are gathered during builds and sent to coveralls for analysis. Coveralls then summarises the code coverage for the project gives an overall code coverage metric ranging from 0 to 100\%. Coveralls is free to use with open source projects.
