@@ -1,9 +1,9 @@
 \begin{abstract}
 
-Microservice architectures have become immensely popular in recent years. They allow developers to split business critical components into loosely coupled services, allowing teams to adopt agile methodologies such as dev-ops, continuous delivery, and test-driven development for validation.
+Microservice architectures have become immensely popular in recent years. They enable the separation of critical components into loosely coupled services, this in turn enables teams to adopt agile methodologies such as DevOps, continuous delivery, and test-driven development for validation.
 
-One of the lesser used forms of validating microservices is stress testing. This form of testing is often regarded as an afterthought until it becomes a critical issue. Possible reasons for this include the infrastructure required for performing stress testing goes well beyond that of other forms of testing, such as unit testing or integration testing. Stress testing usually requires the need for a lot of hardware which can be costly.
+A lesser used forms of validating microservices is stress testing, which tests the robustness and error handling of systems under heavy load. Stress testing is often an afterthought until it becomes a critical issue. A reason this can be unappealing for teams to implement is due to the complexities required to setup a test infrastructure as well as the financial cost of hardware and test planning when compared to unit testing or integration testing.
 
-In this project, we present a new stress testing tool that we have developed that can validate and monitor services within a microservice architecture. This tool currently stress tests WebSocket protocols, however, we hope in the future this can be expanded for testing other protocols.
+This project demonstrates an approach stress testing that validates and monitors services within microservice architectures by actively monitoring the underlying services of an application while testing is in progress, to allow developers gain a greater understanding of how increased traffic is affecting their systems. This framework currently stress tests web socket protocols, however, in the future this can be expanded for testing other protocols.
 
 \end{abstract}
