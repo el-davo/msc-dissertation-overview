@@ -1,11 +1,13 @@
 \chapter{Results and Observations}
 \lhead{\emph{Results and Observations}}
 
-In this section, we will present the results of the experiments that we have conducted. For each experiment, we will outline how the experiment was set up, what technologies we are testing and also give an unbiased overview of the data gathered.
+In this section, the results of the experiments that have been conducted are presented. For each experiment, we will outline how the experiment was set up, what technologies we are testing and also give an unbiased overview of the data gathered.
 
 \section{Stress Testing Multiple Language Implementations}
 
-For the first experiment, we will be conducting a number of stress tests on three separate programming language WebSocket implementations. The implementation of each WebSocket server will be the vanilla example given from each of the implementations GitHub pages. Each of the experiments in this section will be using the  Kubernetes setup as shown in table \ref{table:kubernetes-setup-experminent-1}
+In this experiment, various implementations of web socket servers will be tested using the platform that has been created. Two web socket applications have been created for this. The first one is built using NodeJS, the second is built using GoLang. The purpose of this test is to demonstrate that the ws-flare platform can test web sockets written in multiple languages.
+
+Before conducting each experiment, the ws-flare-platform has been deployed to a GKE Kubernetes cluster. The resources assigned to this cluster are defined in table \ref{table:kubernetes-setup-experminent-1}. The cost of running such a server for 24 hours a day are approximately 137 euro a month.
 
 \begin{table}[H]
 \resizebox{\textwidth}{!}{%
@@ -21,7 +23,7 @@ small (1 Shared VCpu) & 10    & 10          & 16.99GB
 
 \subsection{NodeJS Websocket Server}
 
-For NodeJS we will be using a popular library called WS. The code for the server is outlined in code section \ref{table:nodejs-server-experiment-1}
+For NodeJS we will be using a popular library called WS. The code for the server is outlined in listing \ref{table:nodejs-server-experiment-1}
 
 \begin{listing}[H]
     \caption{NodeJS Websocket Server Implemntation}
@@ -53,9 +55,9 @@ server.listen(process.env.PORT || 3000);
 \end{minted}
 \end{listing}
 
-The NodeJS server as listed in \ref{table:nodejs-server-experiment-1} code required to handle HTTP upgrades to web socket manually as Cloud Foundry does not automatically handle the HTTP upgrade.
+The NodeJS server as outline in listing \ref{table:nodejs-server-experiment-1}. One important node is that the code required to handle HTTP upgrades to web socket manually as Cloud Foundry does not automatically handle the HTTP upgrade. Without this hook it is not possible run a web socket server on Cloud Foundry. 
 
-The NodeJS WebSocket server is deployed on cloud foundry with the resource limits specified in table \ref{table:cf-resource-limits-1}
+The NodeJS web socket server is deployed on cloud foundry with the resource limits specified in table \ref{table:cf-resource-limits-1}
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -69,8 +71,17 @@ Instances & Memory Limit Per Instance \\
 \label{table:cf-resource-limits-1}
 \end{table}
 
+A diagram of the test to be conducted is shown in figure \ref{fig:experiment-1-vis-nodejs}
+
+\begin{figure}[H]
+  \centering
+  \caption{Experiment setup for NodeJS server}
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-vis-nodejs.png}
+    \label{fig:experiment-1-vis-nodejs}
+\end{figure}
+
 \subsubsection{Simulating 1000 connections}
-The initial test will use the following ws-flare script to simulate 1000 users over a period of 60 seconds
+The initial test uses the ws-flare script defined in listing \ref{table:nodejs-server-experiment-1} to simulate 1000 users over a period of 60 seconds
 
 \begin{listing}[H]
     \caption{WS-Flare test script for 1000 users}
@@ -110,11 +121,11 @@ The initial test will use the following ws-flare script to simulate 1000 users o
 
 As can be seen from figure \ref{fig:experiment-1-node-conn-summary-1000} simulating 1000 users has a 100\% success rate.
 
-In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment-1-node-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the web sockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all, connections have been made we then see the CPU return to 0\% usage. 
+In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment-1-node-cpu-1000} the memory and CPU resources are outlined as the test is in progress. We can see that the memory gradually rises from 16(MB) to 34 (MB). The CPU consumption remains stable throughout the test, reaching a maximum of 11\% usage. This occurred as the web sockets were initializing the connection to the server, suggesting that the most resource intensive time occurs when making the initial connection. After all connections have been made we then see the CPU return to 0\% usage. 
 
 \subsubsection{Simulating 5000 Connections}
 
-1000 users connecting at the same time is a good expectation for websites that are not expecting a lot of traffic. Lets increase this to 5000 users using the script in listing \ref{table:nodejs-server-experiment-2}
+1000 users connecting at the same time is a good expectation for websites that are not expecting a lot of traffic. To increase the total connections to 5000, the script in listing \ref{table:nodejs-server-experiment-2} is used.
 
 \begin{listing}[H]
     \caption{WS-Flare test script for 5000 users}
@@ -152,7 +163,7 @@ In figure \ref{fig:experiment-1-node-memory-1000} and figure \ref{fig:experiment
     \label{fig:experiment-1-cpu-5000}
 \end{figure}
 
-After increasing the test to simulate 5000 connections we see from figure \ref{fig:experiment-1-conn-summary-5000} that initially the test reached 1710 connections. After this was reached we see a big dip in memory in figure \ref{fig:experiment-1-memory-5000} and CPU in figure \ref{fig:experiment-1-cpu-5000}. The indicates that a 64(MB) limit of memory is not enough to handle this amount of WebSocket connections. One possible solution to this is to add more instances. Through trial and error, we found that to reach 5000 users successfully connecting at the same time, one of the following resources are needed on Cloud Foundry
+After increasing the test to simulate 5000 connections it can be seen in figure \ref{fig:experiment-1-conn-summary-5000} that initially the test reached 1710 connections. After this was reached there a large drop in memory as seen in figure \ref{fig:experiment-1-memory-5000} and CPU in figure \ref{fig:experiment-1-cpu-5000}. The indicates that a 64(MB) limit of memory is not enough to handle 5000 web socket connections. One possible solution to this is to add more instances. Through experimentation, it was found that to reach 5000 users successfully connecting at the same time, one of the resources defined in table \ref{table:cf-resource-limits-3} are needed on Cloud Foundry.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -209,14 +220,14 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-1-cpu-5000-1-instances-256-mem}
 \end{figure}
 
-Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} we see that the with 1 instance 87\% memory consumption when connections were being established. However, with 4 instances, the CPU usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this, we recommend using 4 instances instead of 1. 
+Comparing the CPU between using 4 instances of 64 MB of memory each in figure \ref{fig:experiment-1-cpu-5000-4-instances} with 1 instance and 256 MB of memory in figure \ref{fig:experiment-1-cpu-5000-1-instances-256-mem} it is clear that 1 instance yields 87\% memory consumption when connections were being established. However, with 4 instances, the CPU usage reached a maximum of 19\% per instance. This is due to the load balancing in effect here. Due to this, it can be concluded that using 4 instances instead of 1 will contribute to a more stable environment. 
 
 \subsubsection{Simulating 30000 Connections}
 
-For the next experiment, we attempted 30000 users connecting at the same time. Using the script in \ref{listing:nodejs-server-experiment-3}
+For the next experiment, 30000 connections was attempted. Using the script in listing \ref{listing:nodejs-server-experiment-3}.
 
 \begin{listing}[H]
-    \caption{WS-Flare test script for 5000 users}
+    \caption{WS-Flare test script for simulating 30000 users}
     \label{listing:nodejs-server-experiment-3}
     \begin{minted}{json}
 [
@@ -230,7 +241,7 @@ For the next experiment, we attempted 30000 users connecting at the same time. U
 \end{minted}
 \end{listing}
 
-There will be 1 instance which is assigned a maximum of 2GB of memory as outlined in table \ref{table:cf-resource-limits-4}
+There is 1 instance which is assigned a maximum of 2GB of memory as outlined in table \ref{table:cf-resource-limits-4}
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -265,7 +276,7 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-3-cpu-5000-1-instances-256-mem}
 \end{figure}
 
-In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} we see that we did not reach the target of 30000 connections within the 60 second limit. Instead, we reached 16365 connections. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. On 35 seconds in the CPU was at 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that this a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however, we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
+In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} it can be seen that the intended target of 30000 connections could not be reached. Instead, 16365 connections was achieved. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. 35 seconds into the test the CPU spiked to 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however, we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%

@@ -18,7 +18,7 @@
 \usepackage{hyperref}
 \usepackage{placeins}
 
-\hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in black, can be distracting if there are many links and colored blue.
+\hypersetup{urlcolor=black, colorlinks=true}  % Colours hyperlinks in black, can be distracting if there are many links and colored blue.
 
 %% ----------------------------------------------------------------
 
@@ -90,18 +90,21 @@ The Thesis Abstract is written here (and usually kept to just this page). The pa
 
 \clearpage  % Abstract ended, start a new page
 %% ----------------------------------------------------------------
-
+\end{comment}
 \setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
 
 % The Acknowledgements page, for thanking everyone
 \acknowledgements{
 \addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
 
-The acknowledgements and the people to thank go here, don't forget to include your project adviser\ldots
+I would like to thank Dr Ruairi O Reilly for his advice, encouragement, expertise and continuous support. I would also like to thank my employers at Dell EMC for providing hardware necessary for conducting experimentation.
+
+Lastly, I would like to thank my family and partner for their continued support throughout the research.
 
 }
 \clearpage  % End of the Acknowledgements
 %% ----------------------------------------------------------------
+\begin{comment}
 
 \pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
 
@@ -148,6 +151,8 @@ The acknowledgements and the people to thank go here, don't forget to include yo
 \input{Chapters/abstract.tex} % Abstract
 
 \tableofcontents
+\listoffigures
+\listoftables
 
 \input{Chapters/introduction.tex} % Introduction
 
