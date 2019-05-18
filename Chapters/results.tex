@@ -1,11 +1,11 @@
 \chapter{Results and Observations}
 \lhead{\emph{Results and Observations}}
 
-In this section, the results of the experiments that have been conducted are presented. For each experiment, we will outline how the experiment was set up, what technologies we are testing and also give an unbiased overview of the data gathered.
+In this section, the results of the experiments that have been conducted are presented. For each experiment, it is outlined how the experiment is set up, what technologies are tested and also an unbiased overview of the data gathered.
 
 \section{Stress Testing Multiple Language Implementations}
 
-In this experiment, various implementations of web socket servers will be tested using the platform that has been created. Two web socket applications have been created for this. The first one is built using NodeJS, the second is built using GoLang. The purpose of this test is to demonstrate that the ws-flare platform can test web sockets written in multiple languages.
+In this experiment, various implementations of web socket servers are tested using the platform that has been created. Two web socket applications have been created for this. The first one is built using NodeJS, the second is built using GoLang. The purpose of this test is to demonstrate that the ws-flare platform can test web sockets written in multiple languages.
 
 Before conducting each experiment, the ws-flare-platform has been deployed to a GKE Kubernetes cluster. The resources assigned to this cluster are defined in table \ref{table:kubernetes-setup-experminent-1}. The cost of running such a server for 24 hours a day are approximately 137 euro a month.
 
@@ -23,7 +23,7 @@ small (1 Shared VCpu) & 10    & 10          & 16.99GB
 
 \subsection{NodeJS Websocket Server}
 
-For NodeJS we will be using a popular library called WS. The code for the server is outlined in listing \ref{table:nodejs-server-experiment-1}
+For NodeJS a popular library called "ws" is used. The code for the server is outlined in listing \ref{table:nodejs-server-experiment-1}
 
 \begin{listing}[H]
     \caption{NodeJS Websocket Server Implemntation}
@@ -313,7 +313,7 @@ Instances & Memory Limit Per Instance \\
 
 \subsection{GoLang WebSocket Server}
 
-To test a GoLang server we wrote a small application using a library called gorilla web socket. The code for this can be seen in listing \ref{listing:golang-server-experiment-1}
+To test a GoLang server a small application was written using a library called gorilla web socket. The code for this can be seen in listing \ref{listing:golang-server-experiment-1}. 
 
 \begin{listing}[H]
     \caption{GoLang Websocket Server Implementation}
@@ -364,6 +364,15 @@ func main() {
 \end{minted}
 \end{listing}
 
+A brief depiction of this experiment can be seen in figure \ref{fig:experiment-1-vis-golang}.
+
+\begin{figure}[H]
+  \centering
+  \caption{Experiment setup for GoLang server}
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-vis-golang.png}
+    \label{fig:experiment-1-vis-golang}
+\end{figure}
+
 \subsubsection{Simulating 1000 connections}
 
 \begin{table}[H]
@@ -399,11 +408,11 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-1-golang-cpu-1000-64}
 \end{figure}
 
-Much like NodeJs, the GoLang server had no trouble handling 1000 simultaneous connections. It is worth noting however that the connections for NodeJs connected faster than with GoLang. Figure \ref{fig:experiment-1-node-conn-summary-1000} shows that all connections in less than 1 second while figure \ref{fig:experiment-1-golang-conn-1000-64} shows that it took 10 seconds longer for all 1000 connections to connect when using GoLang.
+Much like NodeJs, the GoLang server had no trouble handling 1000 simultaneous connections. It is worth noting however that the connections for NodeJs connected faster than with GoLang. Figure \ref{fig:experiment-1-node-conn-summary-1000} shows that all connected in less than 1 second while figure \ref{fig:experiment-1-golang-conn-1000-64} shows that it took 10 seconds longer for all 1000 connections to connect when using GoLang.
 
 \subsubsection{Simulating 5000 connections}
 
-Through experimentation we found that either of the resources defined in table \ref{table:cf-resource-golang-5000} were needed in order to reach 5000 simultaneous connections.
+Through experimentation it was found that either of the resources defined in table \ref{table:cf-resource-golang-5000} were needed in order to reach 5000 simultaneous connections.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -418,7 +427,7 @@ Instances & Memory Limit Per Instance \\
 \label{table:cf-resource-golang-5000}
 \end{table}
 
-For a single instance, this remains the same as what we saw for NodeJs in table \ref{table:cf-resource-limits-3}. However, for multiple instances, we see that we can use one less instance than NodeJs. 
+For a single instance, this remains the same as was seen for NodeJs in table \ref{table:cf-resource-limits-3}. However, for multiple instances, it can be seen that one less instance is needed when compared to NodeJS. 
 
 \subsubsection{Simulating 30000 connections}
 
@@ -459,7 +468,14 @@ Instances & Memory Limit Per Instance \\
 
 \section{Testing Backend With Multiple Services}
 
-To test the ability to monitor multiple services at the same time using the ws-flare framework, we created 3 microservices written in NodeJS. The first microservice is a web socket server as shown in listing \ref{listing:experiment-2-cluster-websocket-server}. This service will accept web socket connections, once a connection has been made it will then send a request to service 1 which is outlined in listing \ref{listing:experiment-2-service-1} every 5 seconds until the connection is closed. Service 1 will send a request to service 2 which is defined in listing \ref{listing:experiment-2-service-2}. Service 2 will respond with a hello message and a number counter which will increment after every request.
+To test the ability to monitor multiple services at the same time using the ws-flare framework, three microservices were created in NodeJS as depicted in figure \ref{fig:experiment-2-architecture}. The first microservice is a web socket server as shown in listing \ref{listing:experiment-2-cluster-websocket-server}. This service accepts web socket connections, once a connection has been made a request is sent every 5 seconds to service 1 which is outlined in listing \ref{listing:experiment-2-service-1} until the connection is closed. Service 1 sends a request to service 2 which is defined in listing \ref{listing:experiment-2-service-2}. Service 2 responds with a hello message and a number counter which increments after every request.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{figures/experiments/experiment-2-multiple-services.png}
+    \caption{Architecture of Web Socket microservice for testing}
+    \label{fig:experiment-2-architecture}
+\end{figure}
 
 \begin{listing}[H]
     \caption{Websocket Server}
@@ -498,7 +514,6 @@ server.on('upgrade', function upgrade(request, socket, head) {
 server.listen(process.env.PORT || 3000, () => {
     console.log('Starting ws server');
 });
-
 \end{minted}
 \end{listing}
 
@@ -542,6 +557,10 @@ app.listen(port, () => console.log('listening on port ' + port));
 \end{minted}
 \end{listing}
 
+\subsubsection{10000 connections}
+
+In order to reach 10000 concurrent connections it was necessary to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The number of resources required here are substantial when compared to what the server is doing, this seems over inflated, however, the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The web socket service and service 2 appear to have performed better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
+
 \begin{table}[H]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lll}
@@ -555,10 +574,6 @@ service2         & 5         & 256MB
 \caption{Resources allocated to each service}
 \label{table:cf-resource-experiment-2-10000}
 \end{table}
-
-\subsubsection{10000 connections}
-
-In order to reach 10000 concurrent connections we had to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The number of resources required here are substantial when we compare this to what the server is doing, this seems massively inflated, however, the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The web socket service and service 2 appear to have operated better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
 
 \begin{figure}[H]
   \centering
@@ -588,11 +603,11 @@ In order to reach 10000 concurrent connections we had to use the resources defin
     \label{fig:experiment-2-service-2-cpu-10000}
 \end{figure}
 
-From these results, it is clear that introducing any network related activity between services has a substantial impact on the performance of services deployed to Cloud Foundry.
+From these results, it is clear that introducing any network related activity between services has a substantial impact on the performance of services deployed to Cloud Foundry. It is also important to note that using the ws-flare framework it is possible to pinpoint the bottleneck. In this case the results indicate that Service 1 had clear CPU problems trying to handle the network traffic.
 
 \section{Usage in Continuous Integration}
 
-With the ever growing shift from manual testing to automated testing there are a large number of tools available which can automate tasks seamless. TravisCI \cite{travisCI}, AppveyorCI \cite{appveyorCI} and Jenkins \cite{jenkinsCi} are some of the more popular tools available in this area. We wanted to test the integration between the ws-flare platform and continuous integration tools in order to demonstrate that this new platform can easily integrate with other tools. We created a command line tool that could integrate with the ws-flare platform. The command line tool is named ws-flare-cli. The tool is distributed as an NPM package and can be installed on any system that is running NodeJS. To install the package the command in listing \ref{listing:ws-flare-cli-install} can be used. This makes the CLI tool available to use in a command prompt.
+With the ever growing shift from manual testing to automated testing there are a large number of tools available which can automate tasks seamlessly. TravisCI \cite{travisCI}, AppveyorCI \cite{appveyorCI} and Jenkins \cite{jenkinsCi} are some of the more popular tools available in this area. To test the integration between the ws-flare platform and these continuous integration tools a command line application was created that can integrate with the ws-flare platform. The command line application is named "ws-flare-cli". The application is distributed as an NPM package and can be installed on any system that is running NodeJS. To install the package the command in listing \ref{listing:ws-flare-cli-install} can be used. This makes the CLI application available to use in a command prompt.
 
 \begin{listing}[H]
     \caption{Command to install the ws-flare-cli package}
@@ -602,7 +617,7 @@ npm install -g ws-flare-cli
 \end{minted}
 \end{listing}
 
-The tool takes 2 parameters as demonstrated in listing \ref{listing:ws-flare-cli-parameters-example}. The first parameters is the URL to where the ws-flare platform is located. The second parameter is the generated token needed to gain access to to the GraphQL interface. This token is encrypted with JWT (JSON Web Token) for security reasons. If the wrong token is provided then the ws-flare platform will reject the request to start a task.
+The application takes 2 parameters as demonstrated in listing \ref{listing:ws-flare-cli-parameters-example}. The first parameters is the URL to where the ws-flare platform is located. The second parameter is the generated token needed to gain access to to the GraphQL interface. This token is encrypted with JWT (JSON Web Token) for security reasons. If the wrong token is provided then the ws-flare platform rejects the request to start a task.
 
 \begin{listing}[H]
     \caption{Command to run a task on the ws-flare platform}
@@ -612,7 +627,7 @@ ws-flare-cli --server=<WS-FLARE-SERVER-LOCATION> --token=<TASK-TOKEN>
 \end{minted}
 \end{listing}
 
-To demonstrate that the ws-flare-cli tool can be easily integrated into multiple continuous integration tools, we created 2 experiments. The first uses TravisCI and the second uses AppveyorCI. Travis reads commands from a file called ``.travis.yml``. The file contents are shown in listing \ref{listing:ws-flare-cli-travis-yaml}
+To demonstrate that the ws-flare-cli tool can be easily integrated into multiple continuous integration tools, two experiments were created. The first uses TravisCI and the second uses AppveyorCI. Travis reads commands from a file called ``.travis.yml``. The file contents are shown in listing \ref{listing:ws-flare-cli-travis-yaml}
 
 \begin{listing}[H]
     \caption{Travis YAML file for running ws-flare-cli commands}
@@ -672,7 +687,7 @@ build: off
 \end{minted}
 \end{listing}
 
-The corresponding output from running against Appveyor can be seen in listing \ref{fig:experiment-3-appveyor-log}. In this experiment, the test passed again, however it failed it would also fail the build as demonstrated in figure \ref{fig:experiment-3-appveyor-log-failed}. Failing the build is as important as passing the build. If the build fails it will prevent the code from being merged that could impact the performance of the system.
+The corresponding output from running against Appveyor can be seen in listing \ref{fig:experiment-3-appveyor-log}. In this experiment, the test passed again, however it failed it would also fail the build as demonstrated in figure \ref{fig:experiment-3-appveyor-log-failed}. Failing the build is as important as passing the build. If the build fails it prevents the code from being merged that could impact the performance of the system.
 
 \begin{figure}[H]
   \centering
@@ -687,3 +702,7 @@ The corresponding output from running against Appveyor can be seen in listing \r
     \caption{Failed Appveryor build when running ws-flare-cli command}
     \label{fig:experiment-3-appveyor-log-failed}
 \end{figure}
+
+\section{Summary}
+
+Through the experiments presented it is clear that the ws-flare stress testing platform can test websocket servers written in a multitude of languages. It is also demonstrated that the monitoring capabilities of the framework go beyond that of any other tool currently available with respect to microservices deployed on Cloud Foundry. It is also shown that that this framework can be integrated into continuous integration environments, making it an attractive candidate for companies practicing agile and devOps methodologies.
