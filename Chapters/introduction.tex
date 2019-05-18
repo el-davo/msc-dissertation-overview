@@ -13,7 +13,7 @@ Microservices do have some disadvantages. In larger applications, there may be h
 
 Traffic monitoring is another problem for microservices \cite{sun2015security}. An example of this would be in a web application. If a user connects to a web interface, they may make a network request to login to the application. The network request may enter the microservice system and be forwarded on to any number of services before responding to a users request. Tracing the flow of network requests through the system and understanding how each service is affected is important in maintaining a healthy, scalable system. 
 
-Test-driven development (TDD) in microservice architectures is a good way to try and circumvent some of these problems. By utilizing TDD, developers have re-assurance that artifacts they are releasing to production environments are in working order. TDD comes in a variety of forms, such as unit, integration and end-to-end testing \cite{7160271}. There is also another form of testing known as stress testing which is the focus of this dissertation. 
+Test-driven development (TDD) in microservice architectures is a good way to try and circumvent some of these problems. By utilizing TDD, developers have re-assurance that artifacts they are releasing to production environments are in working order. TDD comes in a variety of forms, such as unit, integration and end-to-end testing \cite{7160271}. There is also another form of testing known as stress testing which is the focus of this dissertation.
 
 Stress testing involves simulating a high level of traffic to see if a system can handle certain loads. This is an important metric for developers. This form of testing provides developers with reassurance that the system they are building can handle the number of users they are expecting. Without stress testing, it is highly likely that the system will experience outages due to its inability to handle heavy user load, which can lead to financial loss when building e-commerce systems, as well as the cost of debugging and potentially re-writing parts of a system.
 
@@ -31,20 +31,20 @@ The second motivation for designing and developing this platform, is to easily a
 
 \subsection{Research Question}
 
-As production level software increasingly relies on websockets in microservice environments. The inherent complexity of this paradigm necessetates a deep understanding of software development and the archetrictural design of software. One area of complexity where this is demonstrated is the evaluation of how websocket protocols would perform between services under varying loads. 
+Production level software increasingly relies on web sockets in microservice environments in order to enable real time communication. The inherent complexity of this paradigm necessitates a deep understanding of software development and the architectural design of software. One area of complexity where this is demonstrated is the evaluation of how web socket protocols would perform between services under varying loads. 
 
 As such the question is asked. Can an integrated development tool be designed such that the complexity involved in evaluating a microservice architecture implementation of a websocket protocol can be carried out in a simplified and automated manner?
 
-The aim of this project is to design and develop a web socket stress testing tool that can also monitor microservice environments and each of the underlying services in order to give developers a greater understanding of how large amounts of traffic can affect their environments.
+The aim of this project is to design and develop a web socket stress testing framework that can also monitor microservice environments and each of the underlying services in order to give developers a greater understanding of how increasing network traffic can affect their environments.
 
 \subsection{Research Objectives}
 
 \begin{itemize}
-  \item To gain an appreciation for the underlying limitations of development in a microservice environment.
+  \item To research and gain an appreciation for the underlying limitations of development in a microservice environment.
   \item To research and develop a web socket stress testing tool that can also monitor microservice environments.
   \item Summarize results of a test to a developer using an intuitive interface.
   \item Test the system using a variety of WebSocket server implementations. Using GoLang and NodeJS to see how scalable the platform is.
-  \item To research and develop integrate the platform with existing continuous integration tools.
+  \item To integrate the platform with existing continuous integration tools.
 \end{itemize}
 
 \subsection{Structure of this document}
