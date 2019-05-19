@@ -7,7 +7,7 @@ In this section, the results of the experiments that have been conducted are pre
 
 In this experiment, various implementations of web socket servers are tested using the platform that has been created. Two web socket applications have been created for this. The first one is built using NodeJS, the second is built using GoLang. The purpose of this test is to demonstrate that the ws-flare platform can test web sockets written in multiple languages.
 
-Before conducting each experiment, the ws-flare-platform has been deployed to a GKE Kubernetes cluster. The resources assigned to this cluster are defined in table \ref{table:kubernetes-setup-experminent-1}. The cost of running such a server for 24 hours a day are approximately 137 euro a month.
+Before conducting each experiment, the ws-flare-platform has been deployed to a GKE Kubernetes cluster. The resources assigned to this cluster are defined in table \ref{table:kubernetes-setup-experminent-1}. The cost of running such a server for 24 hours a day is approximately 137 euro a month.
 
 \begin{table}[H]
 \resizebox{\textwidth}{!}{%
@@ -55,7 +55,7 @@ server.listen(process.env.PORT || 3000);
 \end{minted}
 \end{listing}
 
-The NodeJS server as outline in listing \ref{table:nodejs-server-experiment-1}. One important node is that the code required to handle HTTP upgrades to web socket manually as Cloud Foundry does not automatically handle the HTTP upgrade. Without this hook it is not possible run a web socket server on Cloud Foundry. 
+The NodeJS server as outline in listing \ref{table:nodejs-server-experiment-1}. One important note is that the code required to handle HTTP upgrades to web socket manually as Cloud Foundry does not automatically handle the HTTP upgrade. Without this hook, it is not possible to run a web socket server on Cloud Foundry. 
 
 The NodeJS web socket server is deployed on cloud foundry with the resource limits specified in table \ref{table:cf-resource-limits-1}
 
@@ -276,7 +276,7 @@ Instances & Memory Limit Per Instance \\
     \label{fig:experiment-3-cpu-5000-1-instances-256-mem}
 \end{figure}
 
-In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} it can be seen that the intended target of 30000 connections could not be reached. Instead, 16365 connections was achieved. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. 35 seconds into the test the CPU spiked to 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however, we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
+In figure \ref{fig:experiment-3-conn-summary-5000-1-instances-256-mem} it can be seen that the intended target of 30000 connections could not be reached. Instead, 16365 connections were achieved. The reason for this becomes clear when we look at figure  \ref{fig:experiment-3-cpu-5000-1-instances-256-mem}. 35 seconds into the test the CPU spiked to 120\% which goes over the 100\% limit imposed by Cloud Foundry. It is clear that a single server is not enough to allow 30000 connections. We can keep adding more and more memory, however, we are bound by the constraints of the CPU on Cloud Foundry, which means adding more memory would not achieve better results. Scaling to the resources defined in table \ref{table:cf-resource-limits-5} produced better results as can be seen in figure \ref{fig:experiment-3-conn-summary-30000-5-instances-512-mem}. There were 27764 successful connections and 2236 dropped connections.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -412,7 +412,7 @@ Much like NodeJs, the GoLang server had no trouble handling 1000 simultaneous co
 
 \subsubsection{Simulating 5000 connections}
 
-Through experimentation it was found that either of the resources defined in table \ref{table:cf-resource-golang-5000} were needed in order to reach 5000 simultaneous connections.
+Through experimentation it was found that either of the resources defined in table \ref{table:cf-resource-golang-5000} was needed in order to reach 5000 simultaneous connections.
 
 \begin{table}[H]
 \resizebox{0.7\textwidth}{!}{%
@@ -559,7 +559,7 @@ app.listen(port, () => console.log('listening on port ' + port));
 
 \subsubsection{10000 connections}
 
-In order to reach 10000 concurrent connections it was necessary to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The number of resources required here are substantial when compared to what the server is doing, this seems over inflated, however, the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The web socket service and service 2 appear to have performed better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
+In order to reach 10000 concurrent connections, it was necessary to use the resources defined in table \ref{table:cf-resource-experiment-2-10000}. The number of resources required here are substantial when compared to what the server is doing, this seems over-inflated, however, the results seem to indicate massive CPU usage in service 1 which seems to act as a bottleneck, as can be seen in figure \ref{fig:experiment-2-service-1-cpu-10000} some of the services go above the 100\% threshold for the CPU. Even with the substantial amount of resources assigned to each service we still see a lot of dropped connections as can be seen in figure \ref{fig:experiment-2-conn-10000}. The web socket service and service 2 appear to have performed better in this experiment as can be seen from figure \ref{fig:experiment-2-ws-cpu-10000} and figure \ref{fig:experiment-2-service-2-cpu-10000}, the CPU remained at reasonable levels well within the 100\% CPU threshold.
 
 \begin{table}[H]
 \resizebox{\textwidth}{!}{%
@@ -603,7 +603,7 @@ service2         & 5         & 256MB
     \label{fig:experiment-2-service-2-cpu-10000}
 \end{figure}
 
-From these results, it is clear that introducing any network related activity between services has a substantial impact on the performance of services deployed to Cloud Foundry. It is also important to note that using the ws-flare framework it is possible to pinpoint the bottleneck. In this case the results indicate that Service 1 had clear CPU problems trying to handle the network traffic.
+From these results, it is clear that introducing any network related activity between services has a substantial impact on the performance of services deployed to Cloud Foundry. It is also important to note that using the ws-flare framework it is possible to pinpoint the bottleneck. In this case, the results indicate that Service 1 had clear CPU problems trying to handle the network traffic.
 
 \section{Usage in Continuous Integration}
 
@@ -705,4 +705,4 @@ The corresponding output from running against Appveyor can be seen in listing \r
 
 \section{Summary}
 
-Through the experiments presented it is clear that the ws-flare stress testing platform can test websocket servers written in a multitude of languages. It is also demonstrated that the monitoring capabilities of the framework go beyond that of any other tool currently available with respect to microservices deployed on Cloud Foundry. It is also shown that that this framework can be integrated into continuous integration environments, making it an attractive candidate for companies practicing agile and devOps methodologies.
+Through the experiments presented it is clear that the ws-flare stress testing platform can test web socket servers written in a multitude of languages. It is also demonstrated that the monitoring capabilities of the framework go beyond that of any other tool currently available with respect to microservices deployed on Cloud Foundry. It is also shown that this framework can be integrated into continuous integration environments, making it an attractive candidate for companies practicing agile and DevOps methodologies.
